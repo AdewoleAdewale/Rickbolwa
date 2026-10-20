@@ -1,0 +1,271 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:dxui="http://dips.xamarin.ui.com" xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:renderers11="clr-namespace:Rickbolwa.Helper"
+             x:Class="Rickbolwa.Views.Payment" 
+                    xmlns:t1="http://xamarin.com/schemas/2020/toolkit" 
+             NavigationPage.HasNavigationBar="True"
+           BackgroundColor="{StaticResource PrimaryDarkColor}"
+      Padding="0,40,0,0">
+
+    <ContentPage.Resources>
+        <t1:InvertedBoolConverter x:Key="InverseBool"/>
+
+        <Style TargetType="Label">
+            <Setter Property="TextColor"
+                Value="{AppThemeBinding Dark=#666666, Light=#222222}"/>
+        </Style>
+
+        <Style TargetType="Entry">
+            <Setter Property="TextColor"
+                Value="{AppThemeBinding Dark=#666666, Light=#222222}"/>
+            <Setter Property="BackgroundColor"
+                Value="{AppThemeBinding Dark=#1d1d1d, Light=#F1F1F1}"/>
+        </Style>
+        <DataTemplate x:Key="ActiveIndicatorTemplate">
+            <StackLayout Orientation="Horizontal">
+                <Ellipse Fill="#FF9900" />
+                <Line IsVisible="{TemplateBinding IsFinal, Converter={StaticResource InverseBool}}" />
+            </StackLayout>
+        </DataTemplate>
+        <DataTemplate x:Key="IndicatorTemplate">
+            <StackLayout Orientation="Horizontal">
+                <Ellipse />
+                <Line IsVisible="{TemplateBinding IsFinal, Converter={StaticResource InverseBool}}" />
+            </StackLayout>
+        </DataTemplate>
+
+        <renderers11:IndicatorTemplateSelector x:Key="IndicatorTemplateSelector"
+            ActiveTemplate="{StaticResource ActiveIndicatorTemplate}"
+            DefaultTemplate="{StaticResource IndicatorTemplate}" />
+    </ContentPage.Resources>
+
+
+
+    <dxui:ModalityLayout OverlayColor="Transparent" Opacity="10" Margin="10,10,10,10">
+
+
+        <ScrollView HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <StackLayout >
+                <StackLayout  Margin="0,0,0,0"  Orientation="Horizontal">
+                    <StackLayout Margin="20,10,20,0" Spacing="10">
+
+                        <Label
+                    FontAttributes="Bold"
+                    FontSize="20"
+                    Padding="10"
+                    Text="VEHICLE HAULAGE PAYMENT "
+                    TextColor="White"
+                            HorizontalTextAlignment="Center"
+                    VerticalOptions="CenterAndExpand" />
+                    </StackLayout>
+
+                    <Image
+                    HorizontalOptions="EndAndExpand"
+                    Source="enumerate.png"
+                   Margin="5,-5,10,-5"
+                    WidthRequest="120" />
+                </StackLayout>
+                <yummy:PancakeView
+            Margin="0,20,0,0"
+            Padding="30,50,30,30"
+            BackgroundColor="White"
+            CornerRadius="20,20,20,20"
+            VerticalOptions="FillAndExpand">
+                    <StackLayout Spacing="15">
+
+                        <StackLayout Spacing="10">
+                            <Label
+                        Margin="20,0,0,0"
+                        FontSize="15"
+                          
+                        Text="SERVICE NAMES"
+                         FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryDarkColor}"  />
+                            <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"                            
+                        HeightRequest="50">
+                                <renderers11:BorderlessEntry
+                            FontSize="13"
+                            ClearButtonVisibility="WhileEditing"
+                            Keyboard="Text"
+                             
+                                    IsReadOnly="True"
+                            TextColor="Black"
+                                x:Name="Servicename"/>
+                            </yummy:PancakeView>
+                        </StackLayout>
+
+
+                        <StackLayout Spacing="10">
+                            <Label
+                        Margin="20,0,0,0"
+                        FontSize="15"
+                           
+                        Text="VEHICLE LICENSE NUMBER"
+                         FontAttributes="Bold"
+                        TextColor="#004225
+                                "  />
+                            <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                <renderers11:BorderlessEntry
+                            FontSize="13"
+                             ClearButtonVisibility="WhileEditing"
+                               IsReadOnly="True"
+                            TextColor="Black" 
+                                x:Name="PayerId"
+                                />
+                            </yummy:PancakeView>
+                        </StackLayout>
+
+                        <StackLayout Spacing="10">
+                            <Label
+                        Margin="20,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text="STATE*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                            <yummy:PancakeView
+                            
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                <Picker x:Name="picker" Title="Select State To" FontSize="12" TitleColor="Red">
+
+                                </Picker>
+                            </yummy:PancakeView>
+
+
+                        </StackLayout>
+
+                        <StackLayout Spacing="10">
+                            <Label
+                        Margin="20,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text="AMOUNT"
+                           
+                        TextColor="{StaticResource PrimaryDarkColor}" 
+                        />
+                            <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                <renderers11:BorderlessEntry
+                            FontSize="13"
+                             ClearButtonVisibility="WhileEditing"
+                        
+                            TextColor="Red" 
+                                x:Name="Amount"/>
+                            </yummy:PancakeView>
+                        </StackLayout>
+
+
+                        <StackLayout Spacing="10">
+                            <Label
+                        Margin="20,0,0,0"
+                        FontSize="15"
+                        Text=" PIN*"
+                            FontAttributes="Bold"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                            <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                <renderers11:BorderlessEntry
+                            FontSize="13"
+                             ClearButtonVisibility="WhileEditing"
+                            IsPassword="True"  
+                                           Unfocused="Pin_Unfocused"
+                                MaxLength="4"
+                                    Placeholder="Transaction Pin"
+                                    PlaceholderColor="LightGray"
+                                Keyboard="Numeric"
+                            TextColor="Black" 
+                                x:Name="PIN"/>
+                            </yummy:PancakeView>
+                        </StackLayout>
+
+                        <yummy:PancakeView
+                    BackgroundColor="{StaticResource PrimaryDarkColor}"
+                    BorderThickness="5"
+                    CornerRadius="10"
+                        HasShadow="True"
+                        BorderColor="White"
+                            x:Name="makepaymentbutton"
+                    Elevation="3"
+                    HeightRequest="60"
+                    HorizontalOptions="FillAndExpand"
+                    WidthRequest="150">
+                            <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        HorizontalOptions="CenterAndExpand"
+                        Text="PROCESS HAULAGE PAYMENT"
+                        TextColor="White"
+                        VerticalOptions="CenterAndExpand" >
+
+                            </Label>
+                            <yummy:PancakeView.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" ></TapGestureRecognizer>
+                            </yummy:PancakeView.GestureRecognizers>
+                        </yummy:PancakeView>
+
+                    </StackLayout>
+                </yummy:PancakeView>
+            </StackLayout>
+        </ScrollView>
+
+        <dxui:ModalityLayout.Behaviors >
+            <dxui:SheetBehavior x:Name="sheetBehavior"
+                 IsOpen="True"
+                                ActionTitleColor="Red"
+                 IsCancelButtonVisible="True"
+                 TitleColor="{StaticResource PrimaryDarkColor}"
+                 TitleSize="25"
+                                   CancelTitle="CLOSE"
+   CancelTitleColor="Red"
+ActionTitle="CLOSE"
+   ActionClicked="sheetBehavior_ActionClicked"
+                              
+                                Title="NOTIFICATION"
+                 HeaderColor="White"
+                          TitleFontAttributes="Bold"      
+                 IsDraggable="True"
+                 VerticalContentAlignment="SameAsSheet">
+                <dxui:SheetBehavior.SheetContentTemplate>
+                    <DataTemplate>
+                        <StackLayout Spacing="-30" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand" Padding="10">
+
+                            <Image Source="gooddone" Aspect="AspectFit" HeightRequest="100" Margin="10" WidthRequest="50" IsAnimationPlaying="True"></Image>
+
+                            <Label Text="PAYMENT WAS SUCCESSFUL " Margin="10,20,20,10" TextColor="{StaticResource PrimaryDarkColor}" TextType="Html" HorizontalTextAlignment="Center"  HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand" FontSize="20" FontAttributes="Bold"></Label>
+
+                            <Button Padding="10" Margin="40" BackgroundColor="{StaticResource PrimaryDarkColor}" Text="CONTINUE" CornerRadius="10" Clicked="Button_Clicked" TextColor="White" HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"></Button>
+
+                        </StackLayout>
+                    </DataTemplate>
+                </dxui:SheetBehavior.SheetContentTemplate>
+            </dxui:SheetBehavior>
+        </dxui:ModalityLayout.Behaviors>
+
+    </dxui:ModalityLayout>
+
+</ContentPage>

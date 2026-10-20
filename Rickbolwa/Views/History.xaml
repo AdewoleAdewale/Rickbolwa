@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView"
+             x:Class="Rickbolwa.Views.History"              Padding="0,20,0,0"
+    BackgroundColor="{StaticResource PrimaryDarkColor}"
+    NavigationPage.HasNavigationBar="True">
+
+    <ScrollView HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+
+
+        <StackLayout>
+            <Label  Text="HAULAGE PAYMENT HISTORY" TextColor="White" FontSize="20" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,10,0,0"/>
+            <yummy:PancakeView
+                Margin="0,30,0,0"
+                Padding="20"
+                BackgroundColor="White"
+                CornerRadius="20"
+                VerticalOptions="FillAndExpand">
+                <StackLayout Spacing="5">
+
+                    <Label Text="START DATE:" TextColor="{StaticResource PrimaryDarkColor}"
+                           Margin="20,0,0,0" FontAttributes="Bold"
+                        FontSize="15"/>
+                    <DatePicker x:Name="startDatePicker"
+                    Format="D" FontSize="13"
+                    Margin="15, 0, 0, 30"  
+                                
+                     />
+
+                    <Label Text="END DATE:" 
+                           Margin="20,0,0,0" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"
+                        FontSize="15"/>
+                    <DatePicker x:Name="endDatePicker"    FontSize="13"                        
+                    MinimumDate="01/01/2017"
+                    Format="D"
+                    Margin="15, 0, 0, 30"
+                     />
+
+                    <Button Text="SEARCH REPORT" CornerRadius="10" BackgroundColor="{StaticResource PrimaryDarkColor}" TextColor="White" Clicked="Button_Clicked"/>
+
+                    <Grid Margin="0,0,0,0" BackgroundColor="White">
+                        <StackLayout Margin="10" BackgroundColor="White" Spacing="10">
+
+                            <Label Text=" DATE RANGE SEARCH DETAILS " TextColor="{StaticResource PrimaryDarkColor}" FontSize="18" FontAttributes="Bold" BackgroundColor="White" HorizontalOptions="CenterAndExpand"/>
+                        </StackLayout>
+
+                    </Grid>
+
+
+                    <ListView x:Name="listView" SeparatorColor="{StaticResource DividerColor}"  HasUnevenRows="True" ItemsSource="{Binding HD}"  HeightRequest="{Binding Size}">
+
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <yummy:PancakeView HasShadow="True" BackgroundColor="White" VerticalOptions="StartAndExpand" 
+                                    HorizontalOptions="FillAndExpand">
+                                        <Grid VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <BoxView BackgroundColor="{StaticResource PrimaryDarkColor}" WidthRequest="3" HorizontalOptions="Start" VerticalOptions="FillAndExpand"/>
+
+                                            <Grid HorizontalOptions="FillAndExpand">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="3.5*"/>
+
+                                                </Grid.ColumnDefinitions>
+                                                <StackLayout HorizontalOptions="Center" Margin="-5,-10,10,0" Padding="5" VerticalOptions="Center" BackgroundColor="{StaticResource PrimaryDarkColor}"  WidthRequest="50" >
+
+                                                    <Label Text="||" TextColor="White" FontSize="27" FontAttributes="Bold"
+                                                   HorizontalOptions="Center"/>
+                                                    <Label Text="BIRS" TextColor="White" FontSize="10" FontAttributes="Bold"
+                                                   HorizontalOptions="Center" Margin="0,-10,0,0"/>
+                                                </StackLayout>
+                                                <BoxView Grid.Column="1" BackgroundColor="Transparent" WidthRequest="1" HorizontalOptions="Start"  VerticalOptions="FillAndExpand"/>
+                                                <StackLayout Grid.Column="2" HorizontalOptions="Start" VerticalOptions="Center" Margin="-60,5,-5,7"
+                                                        Padding="30,0,20,10" Spacing="5">
+
+                                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,*,*">
+
+
+                                                        <Label Grid.Row="1" LineBreakMode="NoWrap"  Text="REFERENCE:"   FontSize="12" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="1" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding transactionId}" TextColor="Black" FontSize="12"/>
+
+                                                        <Label Grid.Row="2" LineBreakMode="NoWrap"  Text="SERVICE NAME:"   FontSize="13" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="2" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding serviceName}" TextColor="Black" FontSize="12"/>
+
+                                                        <Label Grid.Row="5" LineBreakMode="NoWrap"  Text="AMOUNT:"   FontSize="12" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="5" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding amount}" TextColor="Red" FontSize="12"/>
+
+                                                        <Label Grid.Row="4" LineBreakMode="NoWrap"  Text="PAYER ID:"   FontSize="12" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="4" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding payerId}" TextColor="Black" FontSize="12"/>
+
+                                                        <Label Grid.Row="3" LineBreakMode="NoWrap"  Text="BUSINESS NAME :"   FontSize="12" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="3" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding businessName}" TextColor="Black" FontSize="12"/>
+
+                                                        <Label Grid.Row="6" LineBreakMode="NoWrap"  Text="DATE:"   FontSize="12" FontAttributes="Bold" TextColor="{StaticResource PrimaryDarkColor}"></Label>
+
+                                                        <Label   Grid.Row="6" LineBreakMode="NoWrap"  Grid.Column="1" Text="{Binding dateRecorded, StringFormat='{}{0:MMMM d, yyyy h:mm tt}'}" TextColor="Blue" FontSize="12"/>
+
+                                                    </Grid>
+
+                                                </StackLayout>
+                                            </Grid>
+
+                                        </Grid>
+                                    </yummy:PancakeView>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                        <ListView.Footer>
+                            <Label  Text="{Binding Summary}"  TextColor="red" FontSize="11" FontAttributes="Bold" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand"></Label>
+                        </ListView.Footer>
+                    </ListView>
+
+
+
+                </StackLayout>
+
+            </yummy:PancakeView>
+        </StackLayout>
+    </ScrollView>
+
+
+</ContentPage>

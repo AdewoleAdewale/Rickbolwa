@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:dxui="http://dips.xamarin.ui.com" xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:renderers1="clr-namespace:Rickbolwa.Helper"
+             x:Class="Rickbolwa.Views.Registeration"               NavigationPage.HasNavigationBar="True"
+             BackgroundColor="White"
+           Padding="0,20,0,0">
+
+    <dxui:ModalityLayout OverlayColor="Transparent" Opacity="10" Margin="10,10,10,10">
+
+        <ScrollView HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand">
+            <StackLayout >
+                <StackLayout  Margin="0,0,0,0" >
+                    <StackLayout Margin="20,10,20,0" Spacing="10">
+
+                        <Label
+                    FontAttributes="Bold"
+                    FontSize="25"
+                    Padding="10"
+                    Text=" ENUMERATE VEHICLE  "
+                    TextColor="{StaticResource PrimaryDarkColor}"
+                    HorizontalTextAlignment="Center"/>
+                    </StackLayout>
+
+
+                </StackLayout>
+                <yummy:PancakeView
+            Margin="0,10,0,0"
+            Padding="10,20,10,10"
+            BackgroundColor="White"
+            CornerRadius="10,10,0,0"
+            VerticalOptions="FillAndExpand">
+                    <StackLayout Spacing="30">
+
+                        <Label Text="NOTE: Field with * are reqiured so kindly fill them before you click the button" TextColor="Red" HorizontalTextAlignment="Center"  HorizontalOptions="FillAndExpand" FontAttributes="Bold" FontSize="12"></Label>
+
+
+
+
+                        <StackLayout Spacing="10" HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"  Margin="-5,10,10,0" Padding="10,0,0,10" >
+
+                            <StackLayout Spacing="10">
+                                <Label
+                        Margin="0,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text=" NAME OF DRIVER*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                                <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="WhiteSmoke"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"                        
+                        HeightRequest="50">
+                                    <renderers1:BorderlessEntry
+                            FontSize="12"
+                            ClearButtonVisibility="WhileEditing"
+                            Keyboard="Text"
+                                IsEnabled="True"
+                                BackgroundColor="WhiteSmoke"
+                                Placeholder="Required"
+                                PlaceholderColor="Red"
+                            TextColor="#484848"
+                                x:Name="drivername"/>
+                                </yummy:PancakeView>
+                            </StackLayout>
+                            <StackLayout Spacing="10">
+                                <Label
+                        Margin="0,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text="PLATE NUMBER*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                                <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="WhiteSmoke"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"                        
+                        HeightRequest="50">
+                                    <renderers1:BorderlessEntry
+                            FontSize="12"
+                            ClearButtonVisibility="WhileEditing"
+                            Keyboard="Text"
+                                IsEnabled="True"
+                                BackgroundColor="WhiteSmoke"
+                                Placeholder="Required"
+                                PlaceholderColor="Red"
+                            TextColor="#484848"
+                                x:Name="Platenumber"/>
+                                </yummy:PancakeView>
+                            </StackLayout>
+                            <StackLayout Spacing="10">
+                                <Label
+                       
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text=" OWNER NUMBER*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                                <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="WhiteSmoke"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                    <renderers1:BorderlessEntry
+                            FontSize="12"
+                             ClearButtonVisibility="WhileEditing"
+                            IsPassword="False"
+                                   Placeholder="Required"
+                                            MaxLength="11"
+                                BackgroundColor="WhiteSmoke"
+                                PlaceholderColor="Red"
+                                Keyboard="Telephone"
+                                IsEnabled="True"
+                            TextColor="#484848" 
+                                x:Name="Ownernumber"/>
+                                </yummy:PancakeView>
+                            </StackLayout>
+                            <StackLayout Spacing="10">
+                                <Label
+                        Margin="10,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text="VEHICLE CATEGORY*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                                <yummy:PancakeView
+                            
+                        Padding="10,0,0,0"
+                        BackgroundColor="WhiteSmoke"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                    <Picker x:Name="picker" Title="Select Vehicle Category" FontSize="12" TitleColor="Red">
+
+                                    </Picker>
+                                </yummy:PancakeView>
+
+
+                            </StackLayout>
+                            <StackLayout Spacing="10">
+                                <Label
+                        Margin="10,0,0,0"
+                        FontSize="15"
+                            FontAttributes="Bold"
+                        Text="LGA*"
+                        TextColor="{StaticResource PrimaryDarkColor}" />
+                                <yummy:PancakeView
+                        Padding="10,0,0,0"
+                        BackgroundColor="White"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        Elevation="3"
+                        HeightRequest="50">
+                                    <Picker x:Name="picker2" Title="Select LGA " FontSize="12" TitleColor="Red">
+
+                                    </Picker>
+                                </yummy:PancakeView>
+                            </StackLayout>
+
+
+
+                            <yummy:PancakeView
+                    BackgroundColor="{StaticResource PrimaryDarkColor}"
+                   
+                         BorderThickness="5"
+                    CornerRadius="10"
+                        HasShadow="True"
+                        BorderColor="{StaticResource PrimaryDarkColor}"
+                    Elevation="3"
+                    HeightRequest="55"
+                    HorizontalOptions="FillAndExpand"
+                    WidthRequest="150">
+                                <Label
+                        FontAttributes="Bold"
+                        FontSize="15"
+                        HorizontalOptions="CenterAndExpand"
+                        Text="REGISTER  VEHICLE"
+                        TextColor="White"
+                        VerticalOptions="CenterAndExpand" >
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped" ></TapGestureRecognizer>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </yummy:PancakeView>
+
+
+                        </StackLayout>
+
+
+
+                    </StackLayout>
+
+                </yummy:PancakeView>
+            </StackLayout>
+        </ScrollView>
+
+        <dxui:ModalityLayout.Behaviors >
+            <dxui:SheetBehavior x:Name="sheetBehavior"
+                 IsOpen="True"
+                                ActionTitleColor="Red"
+                 IsCancelButtonVisible="True"
+                 TitleColor="#000057"
+                 TitleSize="25"
+                                   CancelTitle="CLOSE"
+   CancelTitleColor="Red"
+ActionTitle="CLOSE"
+   ActionClicked="sheetBehavior_ActionClicked"
+                              
+                                Title="NOTIFICATION"
+                 HeaderColor="White"
+                          TitleFontAttributes="Bold"      
+                 IsDraggable="True"
+                 VerticalContentAlignment="SameAsSheet">
+                <dxui:SheetBehavior.SheetContentTemplate>
+                    <DataTemplate>
+                        <StackLayout Spacing="-30" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand" Padding="10">
+
+                            <Image Source="gooddone" Aspect="AspectFit" HeightRequest="100" Margin="10" WidthRequest="50" IsAnimationPlaying="True"></Image>
+
+                            <Label Text="REGISTERATION WAS SUCCESSFUL " Margin="10,20,20,10" TextColor="red" TextType="Html" HorizontalTextAlignment="Center"  HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand" FontSize="20" FontAttributes="Bold"></Label>
+
+                            <Button Padding="10" Margin="40" BackgroundColor="#000057" Text="THANK YOU" CornerRadius="10" Clicked="tryagain_Clicked"  TextColor="White" HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"></Button>
+
+                        </StackLayout>
+                    </DataTemplate>
+                </dxui:SheetBehavior.SheetContentTemplate>
+            </dxui:SheetBehavior>
+
+
+            <dxui:SheetBehavior x:Name="failedenumeration"
+                 IsOpen="True"
+                 ActionTitleColor="Red"
+                 IsCancelButtonVisible="True"
+                 TitleColor="#000057"
+                 TitleSize="15"
+                 CancelTitleColor="Red"
+                 ActionClicked="failedenumeration_ActionClicked"              
+                 HeaderColor="White"
+                 TitleFontAttributes="Bold"   
+                                
+                 IsDraggable="True"
+                 VerticalContentAlignment="SameAsSheet">
+                <dxui:SheetBehavior.SheetContentTemplate>
+                    <DataTemplate>
+                        <StackLayout Spacing="-30" HorizontalOptions="CenterAndExpand" VerticalOptions="FillAndExpand" Padding="10">
+
+                            <Image Source="logout" Aspect="AspectFit" HeightRequest="100" Margin="10" WidthRequest="50" IsAnimationPlaying="True"></Image>
+
+                            <Label Text="REGISTERATION FAILED"  Margin="10,20,20,10" TextColor="red" TextType="Html" HorizontalTextAlignment="Center"  HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand" FontSize="20" FontAttributes="Bold"></Label>
+
+                            <Button Padding="10" Margin="40" BackgroundColor="#000057" Text="TRY AGAIN" CornerRadius="10"  TextColor="White"   x:Name="tryagain"    Clicked="tryagain_Clicked" HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand"></Button>
+
+                        </StackLayout>
+                    </DataTemplate>
+                </dxui:SheetBehavior.SheetContentTemplate>
+            </dxui:SheetBehavior>
+
+        </dxui:ModalityLayout.Behaviors>
+
+
+    </dxui:ModalityLayout>
+
+</ContentPage>
