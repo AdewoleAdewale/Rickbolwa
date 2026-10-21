@@ -6,11 +6,11 @@
     <!-- ═══════════════════════════════════════════════════════════
          BRAND PALETTE  —  edit here to recolour every page at once
          ═══════════════════════════════════════════════════════════ -->
-    <Color x:Key="PrimaryColor">#053485</Color>
-    <Color x:Key="PrimaryDarkColor">#063381</Color>
-    <Color x:Key="PrimaryDeepColor">#043382</Color>
-    <Color x:Key="AccentColor">#C9A84C</Color>
-    <Color x:Key="AccentSoftColor">#E8D9A8</Color>
+    <Color x:Key="PrimaryColor">#06581B</Color>
+    <Color x:Key="PrimaryDarkColor">#23891A</Color>
+    <Color x:Key="PrimaryDeepColor">#06581B</Color>
+    <Color x:Key="AccentColor">#FDB405</Color>
+    <Color x:Key="AccentSoftColor">#FD8F01</Color>
 
     <Color x:Key="SurfaceColor">#FFFFFF</Color>
     <Color x:Key="SurfaceAltColor">#F4F6F4</Color>

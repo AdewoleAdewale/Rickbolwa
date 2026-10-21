@@ -55,6 +55,21 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Toasts.Forms.Plugin">
+      <Version>3.3.2</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.AppCompat">
+      <Version>1.3.1.3</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.Legacy.Support.V4">
+      <Version>1.0.0.21</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.Migration">
+      <Version>1.0.10</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.AndroidX.VectorDrawable">
+      <Version>1.1.0.21</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="5.0.0.2196" />
     <PackageReference Include="Xamarin.Essentials" Version="1.7.0" />
   </ItemGroup>
@@ -62,9 +77,6 @@
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\BluetoothPermissionProvider.cs" />
-    <Compile Include="Services\BluetoothPrinterService.cs" />
-    <Compile Include="Services\PrinterDiagnosticsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -87,7 +99,10 @@
     <AndroidResource Include="Resources\mipmap-xxxhdpi\icon.png" />
     <AndroidResource Include="Resources\mipmap-xxxhdpi\launcher_foreground.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\icons8eyes.png" />
+    <AndroidResource Include="Resources\drawable\Openeyes.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rickbolwa\Rickbolwa.csproj">
       <Project>{A1B83D5E-ED1B-4D49-B33D-DD2643DFE531}</Project>
@@ -95,14 +110,22 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Assets\Logo.png" />
-    <Content Include="Resources\drawable\add.png" />
-    <Content Include="Resources\drawable\gooddone.png" />
-    <Content Include="Resources\drawable\icons.png" />
-    <Content Include="Resources\drawable\logout.png" />
-    <Content Include="Resources\drawable\RickbolwaLogo.png" />
-    <Content Include="Resources\drawable\RickbolwaW.png" />
-    <Content Include="Resources\drawable\Rickbolwawhite.png" />
+    <AndroidAsset Include="Assets\Logo.png" />
+    <AndroidResource Include="Resources\drawable\add.png" />
+    <AndroidResource Include="Resources\drawable\gooddone.png" />
+    <AndroidResource Include="Resources\drawable\hamburgerMenu.png" />
+    <AndroidResource Include="Resources\drawable\icons.png" />
+    <AndroidResource Include="Resources\drawable\logout.png" />
+    <AndroidResource Include="Resources\drawable\make.png" />
+    <AndroidResource Include="Resources\drawable\Osoft.png" />
+    <AndroidResource Include="Resources\drawable\PRINT.png" />
+    <AndroidResource Include="Resources\drawable\RickbolwaLogo.png" />
+    <AndroidResource Include="Resources\drawable\RickbolwaW.png" />
+    <AndroidResource Include="Resources\drawable\Rickbolwawhite.png" />
+    <AndroidResource Include="Resources\drawable\shutdown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\drawable\check.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

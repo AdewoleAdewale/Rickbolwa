@@ -21,3 +21,4 @@ namespace Rickbolwa.Helper
         public bool IsFinal { get; set; }
         public bool IsSelected { get; set; }
     }
+}

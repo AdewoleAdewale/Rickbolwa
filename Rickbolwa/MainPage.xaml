@@ -3,281 +3,493 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:renderers="clr-namespace:Rickbolwa.Helper"
              x:Class="Rickbolwa.MainPage" 
-             BackgroundColor="{StaticResource SurfaceColor}"
-    NavigationPage.HasNavigationBar="False">
+                      x:Name="LoginPage"
+             NavigationPage.HasNavigationBar="False">
 
     <ContentPage.Resources>
         <ResourceDictionary>
-            <yummy:GradientStopCollection x:Key="WaveGradient">
-                <yummy:GradientStop Color="{StaticResource PrimaryColor}" Offset="0"/>
-                <yummy:GradientStop Color="{StaticResource PrimaryDarkColor}" Offset="1"/>
-            </yummy:GradientStopCollection>
+            <!-- Styles -->
+            <Style x:Key="InputLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="Opacity" Value="0.95"/>
+            </Style>
 
-            <yummy:GradientStopCollection x:Key="ButtonGradient">
-                <yummy:GradientStop Color="#053485" Offset="0"/>
-                <yummy:GradientStop Color="{StaticResource PrimaryColor}" Offset="0.55"/>
-                <yummy:GradientStop Color="{StaticResource PrimaryDarkColor}" Offset="1"/>
-            </yummy:GradientStopCollection>
-
-            <Style x:Key="FieldLine" TargetType="BoxView">
-                <Setter Property="HeightRequest" Value="1"/>
-                <Setter Property="Color" Value="{StaticResource DividerColor}"/>
+            <Style x:Key="ErrorLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="#FF6B6B"/>
+                <Setter Property="IsVisible" Value="False"/>
+                <Setter Property="Margin" Value="0,-4,0,0"/>
+                <Setter Property="FontAttributes" Value="Italic"/>
             </Style>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <ScrollView>
-        <Grid Padding="8,4,8,6" RowDefinitions="Auto" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+    <Grid>
+        <!-- Animated Gradient Background -->
+        <yummy:PancakeView x:Name="BackgroundGradient">
+            <yummy:PancakeView.BackgroundGradientStops>
+                <yummy:GradientStopCollection>
+                    <yummy:GradientStop Color="#053485" Offset="0"/>
+                    <yummy:GradientStop Color="#063381" Offset="0.25"/>
+                    <yummy:GradientStop Color="#043382" Offset="0.5"/>
+                    <yummy:GradientStop Color="#043382" Offset="0.75"/>
+                    <yummy:GradientStop Color="#053485" Offset="1"/>
+                </yummy:GradientStopCollection>
+            </yummy:PancakeView.BackgroundGradientStops>
+        </yummy:PancakeView>
 
-            <!-- ═══════════════ LOGIN CARD ═══════════════ -->
-            <yummy:PancakeView BackgroundColor="{StaticResource SurfaceColor}" 
-                               CornerRadius="28"
-                               Elevation="14" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
-                               Padding="0">
-                <StackLayout Spacing="0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+        <!-- Animated Overlay Pattern -->
+        <yummy:PancakeView Opacity="0.03">
+            <yummy:PancakeView.BackgroundGradientStops>
+                <yummy:GradientStopCollection>
+                    <yummy:GradientStop Color="Transparent" Offset="0"/>
+                    <yummy:GradientStop Color="White" Offset="0.5"/>
+                    <yummy:GradientStop Color="Transparent" Offset="1"/>
+                </yummy:GradientStopCollection>
+            </yummy:PancakeView.BackgroundGradientStops>
+        </yummy:PancakeView>
 
-                    <!-- ────────── Card body ────────── -->
-                    <StackLayout Padding="26,32,26,26" Spacing="0">
+        <!-- Main Content -->
+        <ScrollView>
+            <Grid RowDefinitions="Auto,*,Auto" Padding="24,60,24,32">
 
-                        <!-- Title -->
-                        <Label Text="Login Rickbolwa"
-                               TextColor="{StaticResource TextPrimaryColor}"
-                               FontSize="27"
-                               FontAttributes="Bold"
-                               HorizontalOptions="Center"/>
+                <!-- Header Section with Animation -->
+                <StackLayout x:Name="HeaderSection" Grid.Row="0" Spacing="12" Margin="0,0,0,48">
+                    <!-- Logo/Icon Placeholder -->
+                    <yummy:PancakeView 
+                        x:Name="LogoContainer"
+                        HeightRequest="80"
+                        WidthRequest="80"
+                        CornerRadius="40"
+                        HorizontalOptions="Center"
+                        HasShadow="True"
+                        Elevation="8">
+                        <yummy:PancakeView.BackgroundGradientStops>
+                            <yummy:GradientStopCollection>
+                                <yummy:GradientStop Color="#0589da" Offset="0"/>
+                                <yummy:GradientStop Color="#1692e0" Offset="1"/>
+                            </yummy:GradientStopCollection>
+                        </yummy:PancakeView.BackgroundGradientStops>
+                        <Image Source="Rickbolwawhite"
+                          Aspect="AspectFit"
+                            HeightRequest="48"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"/>
+                    </yummy:PancakeView>
 
-                        <!-- Terms line -->
-                        <Label HorizontalTextAlignment="Center"
-                               Margin="0,10,0,0"
-                               FontSize="13">
-                            <Label.FormattedText>
-                                <FormattedString>
-                                    <Span Text="By signing in you are agreeing our&#10;"
-                                          TextColor="{StaticResource TextSecondaryColor}"/>
-                                    <Span Text="Terms and privacy policy"
-                                          TextColor="{StaticResource PrimaryColor}"
-                                          FontAttributes="Bold"/>
-                                </FormattedString>
-                            </Label.FormattedText>
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnTermsTapped"/>
-                            </Label.GestureRecognizers>
-                        </Label>
+                    <Label
+                        x:Name="WelcomeText"
+                        Text="Welcome Back"
+                        FontSize="34"
+                        FontAttributes="Bold"
+                        TextColor="White"
+                        HorizontalTextAlignment="Center"/>
 
-                        <!-- ────────── Tabs ────────── -->
-                        <Grid ColumnDefinitions="*,*"
-                              HorizontalOptions="Center"
-                              WidthRequest="240"
-                              Margin="0,24,0,4">
+                    <Label
+                        x:Name="SubtitleText"
+                        Text="Sign in to continue to ROCKBOLWA"
+                        FontSize="15"
+                        TextColor="#B0BEC5"
+                        HorizontalTextAlignment="Center"
+                        Opacity="0.9"/>
+                </StackLayout>
 
-                            <StackLayout Grid.Column="0" Spacing="7">
-                                <Label Text="Login"
-                                       TextColor="{StaticResource PrimaryColor}"
-                                       FontSize="15"
-                                       FontAttributes="Bold"
-                                       HorizontalOptions="Center"/>
-                                <BoxView HeightRequest="3"
-                                         WidthRequest="42"
-                                         CornerRadius="1.5"
-                                         Color="{StaticResource AccentColor}"
-                                         HorizontalOptions="Center"/>
-                            </StackLayout>
+                <!-- Login Form with Glassmorphism Effect -->
+                <yummy:PancakeView
+                    x:Name="LoginCard"
+                    Grid.Row="1"
+                    Padding="32,40"
+                    BackgroundColor="Transparent"
+                    BorderColor="Transparent"
+                    BorderThickness="0">
 
-                            <StackLayout Grid.Column="1" Spacing="7">
-                                <Label Text="Rickbolwa"
-                                       TextColor="{StaticResource TextSecondaryColor}"
-                                       FontSize="15"
-                                       HorizontalOptions="Center"/>
-                                <BoxView HeightRequest="3"
-                                         WidthRequest="42"
-                                         CornerRadius="1.5"
-                                         Color="Transparent"
-                                         HorizontalOptions="Center"/>
-                                <StackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnRegisterTapped"/>
-                                </StackLayout.GestureRecognizers>
-                            </StackLayout>
-                        </Grid>
+                    <StackLayout Spacing="28">
+                        <!-- Email Input -->
+                        <StackLayout x:Name="EmailContainer" Spacing="10">
+                            <Label
+                                Text="Email Address"
+                                Style="{StaticResource InputLabelStyle}"/>
 
-                        <!-- ────────── Email field ────────── -->
-                        <Grid ColumnDefinitions="Auto,*"
-                              ColumnSpacing="14"
-                              Margin="0,26,0,0">
-                            <Label Grid.Column="0"
-                                   Text="✉"
-                                   FontSize="19"
-                                   TextColor="{StaticResource TextSecondaryColor}"
-                                   VerticalOptions="Center"/>
-                            <renderers:BorderlessEntry Grid.Column="1"
-                                   x:Name="Email"
-                                   Placeholder="Email Address"
-                                   PlaceholderColor="{StaticResource TextSecondaryColor}"
-                                   TextColor="{StaticResource TextPrimaryColor}"
-                                   FontSize="15"
-                                   BackgroundColor="Transparent"
-                                   Keyboard="Email"
-                                   ReturnType="Next"
-                                   HeightRequest="44"
-                                   VerticalOptions="Center"/>
-                        </Grid>
-                        <BoxView Style="{StaticResource FieldLine}" Margin="0,2,0,0"/>
+                            <yummy:PancakeView
+                                x:Name="EmailBorder"
+                                Padding="18,6"
+                                BackgroundColor="#0F1419"
+                                BorderColor="#2C3E50"
+                                BorderThickness="2"
+                                CornerRadius="14"
+                                HeightRequest="56">
 
-                        <!-- ────────── Password field ────────── -->
-                        <Grid ColumnDefinitions="Auto,*,Auto"
-                              ColumnSpacing="14"
-                              Margin="0,22,0,0">
-                            <Label Grid.Column="0"
-                                   Text="🔒"
-                                   FontSize="17"
-                                   TextColor="{StaticResource TextSecondaryColor}"
-                                   VerticalOptions="Center"/>
-                            <renderers:BorderlessEntry Grid.Column="1"
-                                   x:Name="Password"
-                                   Placeholder="Password"
-                                   PlaceholderColor="{StaticResource TextSecondaryColor}"
-                                   TextColor="{StaticResource TextPrimaryColor}"
-                                   FontSize="15"
-                                   BackgroundColor="Transparent"
-                                   IsPassword="True"
-                                   ReturnType="Done"
-                                   HeightRequest="44"
-                                   VerticalOptions="Center"/>
-                            <Label Grid.Column="2"
-                                   x:Name="TogglePasswordIcon"
-                                   Text="👁"
-                                   FontSize="17"
-                                   Padding="8,0"
-                                   TextColor="{StaticResource TextSecondaryColor}"
-                                   VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnTogglePassword"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
-                        <BoxView Style="{StaticResource FieldLine}" Margin="0,2,0,0"/>
+                                <Grid ColumnDefinitions="Auto,*">
+                                    <Label 
+                                        Grid.Column="0"
+                                        Text="✉"
+                                        FontSize="20"
+                                        TextColor="#1692e0"
+                                        VerticalOptions="Center"
+                                        Margin="0,0,12,0"/>
 
-                        <!-- ────────── Remember / Forgot ────────── -->
-                        <Grid ColumnDefinitions="Auto,*,Auto"
-                              Margin="0,20,0,0">
+                                    <renderers:BorderlessEntry
+                                        Grid.Column="1"
+                                        x:Name="Email"
+                                        FontSize="16"
+                                        Keyboard="Email"
+                                        BackgroundColor="Transparent"
+                                        Placeholder="your.email@example.com"
+                                        TextColor="White"
+                                        PlaceholderColor="#546E7A"
+                                        VerticalOptions="Center"
+                                        TextChanged="OnEmailTextChanged"
+                                        Unfocused="OnEmailUnfocused"
+                                        Focused="OnEmailFocused"/>
+                                </Grid>
+                            </yummy:PancakeView>
 
-                            <StackLayout Grid.Column="0"
-                                         Orientation="Horizontal"
-                                         Spacing="9">
-                                <yummy:PancakeView x:Name="RememberBox"
-                                                   WidthRequest="20" HeightRequest="20"
-                                                   CornerRadius="5"
-                                                   BackgroundColor="{StaticResource PrimaryColor}"
-                                                   Padding="0"
-                                                   VerticalOptions="Center">
-                                    <Label x:Name="RememberTick"
-                                           Text="✓"
-                                           TextColor="White"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center"/>
-                                </yummy:PancakeView>
-                                <Label Text="Remember me"
-                                       TextColor="{StaticResource TextSecondaryColor}"
-                                       FontSize="13"
-                                       VerticalOptions="Center"/>
-                                <StackLayout.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnRememberToggled"/>
-                                </StackLayout.GestureRecognizers>
-                            </StackLayout>
+                            <Label
+                                x:Name="EmailError"
+                                Style="{StaticResource ErrorLabelStyle}"/>
+                        </StackLayout>
 
-                            <Label Grid.Column="2"
-                                   Text="Forgot password"
-                                   TextColor="{StaticResource PrimaryColor}"
-                                   FontSize="13"
-                                   FontAttributes="Bold"
-                                   VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="OnForgotPassword"/>
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
+                        <!-- Password Input -->
+                        <StackLayout x:Name="PasswordContainer" Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="Password"
+                                    Style="{StaticResource InputLabelStyle}"/>
 
-                        <!-- ────────── Sign in button ────────── -->
-                        <yummy:PancakeView CornerRadius="12"
-                                           Elevation="6"
-                                           Padding="0"
-                                           Margin="0,26,0,0"
-                                           BackgroundGradientStops="{StaticResource ButtonGradient}"
-                                           BackgroundGradientAngle="120">
-                            <Button x:Name="SignInButton"
-                                    Text="Login"
-                                    BackgroundColor="Transparent"
-                                    TextColor="White"
-                                    FontSize="16"
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Forgot Password?"
+                                    FontSize="12"
+                                    TextColor="#1692e0"
                                     FontAttributes="Bold"
-                                    HeightRequest="52"
-                                    CornerRadius="12"
-                                    Clicked="OnSignInClicked"/>
+                                    VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnForgotPasswordTapped"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+
+                            <yummy:PancakeView
+                                x:Name="PasswordBorder"
+                                Padding="18,6"
+                                BackgroundColor="#0F1419"
+                                BorderColor="#2C3E50"
+                                BorderThickness="2"
+                                CornerRadius="14"
+                                HeightRequest="56">
+
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Label 
+                                        Grid.Column="0"
+                                        Text="🔒"
+                                        FontSize="18"
+                                        TextColor="#1692e0"
+                                        VerticalOptions="Center"
+                                        Margin="0,0,12,0"/>
+
+                                    <renderers:BorderlessEntry
+                                        Grid.Column="1"
+                                        x:Name="Password"
+                                        FontSize="16"
+                                        BackgroundColor="Transparent"
+                                        Placeholder="Enter your password"
+                                        TextColor="White"
+                                        PlaceholderColor="#546E7A"
+                                        VerticalOptions="Center"
+                                        TextChanged="OnPasswordTextChanged"
+                                        Unfocused="OnPasswordUnfocused"
+                                        Focused="OnPasswordFocused"
+                                        IsPassword="{Binding Source={x:Reference ShowPasswordActualTrigger}, Path=HidePassword}"/>
+
+                                    <ImageButton 
+                                        Grid.Column="2"
+                                        x:Name="PasswordToggle"
+                                        Source="icons8eyes"
+                                        HeightRequest="24"
+                                        WidthRequest="24"
+                                        BackgroundColor="Transparent"
+                                        VerticalOptions="Center"
+                                        Margin="12,0,0,0"
+                                        Opacity="0.7">
+                                        <ImageButton.Triggers>
+                                            <EventTrigger Event="Clicked">
+                                                <renderers:ShowPasswordTriggerAction 
+                                                    ShowIcon="Openeyes"
+                                                    HideIcon="icons8eyes"
+                                                    x:Name="ShowPasswordActualTrigger"/>
+                                            </EventTrigger>
+                                        </ImageButton.Triggers>
+                                    </ImageButton>
+                                </Grid>
+                            </yummy:PancakeView>
+
+                            <Label
+                                x:Name="PasswordError"
+                                Style="{StaticResource ErrorLabelStyle}"/>
+                        </StackLayout>
+
+                        <!-- Remember Me Checkbox -->
+                        <StackLayout 
+                            x:Name="RememberMeContainer"
+                            Orientation="Horizontal" 
+                            Spacing="12"
+                            Margin="0,0,0,0">
+                            <CheckBox 
+                                x:Name="RememberMeCheckbox"
+                                Color="#1792de"
+                                IsChecked="False"
+                                VerticalOptions="Center"/>
+                            <Label
+                                Text="Remember my login details"
+                                FontSize="14"
+                                TextColor="#B0BEC5"
+                                VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnRememberMeLabelTapped"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </StackLayout>
+
+                        <!-- Sign In Button with Gradient -->
+                        <yummy:PancakeView
+                            x:Name="SignInButton"
+                            Margin="0,20,0,0"
+                            CornerRadius="14"
+                            HeightRequest="58"
+                            HasShadow="True"
+                            Elevation="8">
+                            <yummy:PancakeView.BackgroundGradientStops>
+                                <yummy:GradientStopCollection>
+                                    <yummy:GradientStop Color="#0589da" Offset="0"/>
+                                    <yummy:GradientStop Color="#1792de" Offset="0.5"/>
+                                    <yummy:GradientStop Color="#1692e0" Offset="1"/>
+                                </yummy:GradientStopCollection>
+                            </yummy:PancakeView.BackgroundGradientStops>
+
+                            <Grid>
+                                <Label
+                                    x:Name="SignInButtonText"
+                                    Text="SIGN IN"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    TextColor="White"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                    Opacity="1"/>
+
+                                <ActivityIndicator
+                                    x:Name="SignInButtonLoader"
+                                    IsRunning="False"
+                                    IsVisible="False"
+                                    Color="White"
+                                    HeightRequest="28"
+                                    WidthRequest="28"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"/>
+                            </Grid>
+
+                            <yummy:PancakeView.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="LoginClick"/>
+                            </yummy:PancakeView.GestureRecognizers>
                         </yummy:PancakeView>
 
-                        <!-- ────────── Session note ────────── -->
-                        <StackLayout Orientation="Horizontal"
-                                     Spacing="7"
-                                     HorizontalOptions="Center"
-                                     Margin="0,20,0,0">
-                            <Label Text="🔐" FontSize="12" VerticalOptions="Center"/>
-                            <Label Text="{Binding SessionNote}"
-                                   TextColor="{StaticResource TextSecondaryColor}"
-                                   FontSize="11"
-                                   VerticalOptions="Center"/>
+                        <!-- Powered By Badge -->
+                        <StackLayout 
+                            Orientation="Horizontal" 
+                            HorizontalOptions="Center"
+                            Spacing="8"
+                            Margin="0,12,0,0">
+                            <Label
+                                Text="Powered by"
+                                FontSize="11"
+                                TextColor="#607D8B"
+                                VerticalOptions="Center"/>
+                            <yummy:PancakeView
+                                Padding="8,4"
+                                CornerRadius="6"
+                                BackgroundColor="#FF4500">
+                                <Label
+                                    Text="OSOFTPAY"
+                                    FontSize="11"
+                                    FontAttributes="Bold"
+                                    TextColor="White"/>
+                            </yummy:PancakeView>
                         </StackLayout>
 
                     </StackLayout>
+                </yummy:PancakeView>
 
-                    <!-- ═══════════════ CURVED BRAND PANEL ═══════════════ -->
-                    <yummy:PancakeView BackgroundGradientStops="{StaticResource WaveGradient}"
-                                       BackgroundGradientAngle="135" 
-                                       CornerRadius="90,90,8,8"
-                                       Padding="24,26,24,132">
-                        <StackLayout Spacing="10">
+                <!-- Footer Section with Logos -->
+                <StackLayout x:Name="FooterSection" Grid.Row="2" Spacing="20" Margin="0,40,0,0">
+                    <Label
+                        Text="IN COLLABORATION WITH"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="#78909C"
+                        HorizontalTextAlignment="Center"/>
 
-                            <yummy:PancakeView WidthRequest="72" HeightRequest="72"
-                                               CornerRadius="20"
-                                               BackgroundColor="#1AFFFFFF"
-                                               BorderColor="#33FFFFFF"
-                                       BorderThickness="1"
-                                               HorizontalOptions="Center"
-                                               Padding="0">
-                                <Image Source="Rickbolwawhite"
-                                       HeightRequest="58" WidthRequest="58"
-                                       Aspect="AspectFit"
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center"/>
-                            </yummy:PancakeView>
+                    <StackLayout 
+                        Orientation="Horizontal" 
+                        HorizontalOptions="Center"
+                        Spacing="28">
+                        <yummy:PancakeView
+                            x:Name="Logo1"
+                            Padding="14"
+                            BackgroundColor="White"
+                            CornerRadius="16"
+                            HasShadow="True"
+                            Elevation="4">
+                            <Image 
+                                Source="Rickbolwawhite" 
+                                Aspect="AspectFit" 
+                                HeightRequest="56"
+                                WidthRequest="56"/>
+                        </yummy:PancakeView>
 
-                            <Label Text="{Binding OrganisationAbbr}"
-                                   TextColor="{StaticResource AccentColor}"
-                                   FontSize="19"
-                                   FontAttributes="Bold"
-                                   CharacterSpacing="4"
-                                   HorizontalOptions="Center"/>
+                        <yummy:PancakeView
+                            x:Name="Logo2"
+                            Padding="14"
+                            BackgroundColor="White"
+                            CornerRadius="16"
+                            HasShadow="True"
+                            Elevation="4">
+                            <Image 
+                                Source="Osoft" 
+                                Aspect="AspectFit" 
+                                HeightRequest="56"
+                                WidthRequest="56"/>
+                        </yummy:PancakeView>
+                    </StackLayout>
 
-                            <Label Text="{Binding OrganisationName}"
-                                   TextColor="White"
-                                   FontSize="9.5"
-                                   CharacterSpacing="1.2"
-                                   HorizontalTextAlignment="Center"
-                                   HorizontalOptions="Center"/>
-
-                            <BoxView HeightRequest="1"
-                                     Color="#2EFFFFFF"
-                                     Margin="40,8,40,2"/>
-
-                            <Label x:Name="SupportLabel"
-                                   TextColor="White"
-                                   FontSize="10.5"
-                                   HorizontalTextAlignment="Center"
-                                   HorizontalOptions="Center"/>
-                        </StackLayout>
-                    </yummy:PancakeView>
+                    <!-- Version Info -->
+                    <Label
+                        x:Name="VersionText"
+                        Text="Version 4.0.1"
+                        FontSize="10"
+                        TextColor="#546E7A"
+                        HorizontalTextAlignment="Center"
+                        Margin="0,8,0,0"/>
                 </StackLayout>
-            </yummy:PancakeView>
-        </Grid>
-    </ScrollView>
+
+            </Grid>
+        </ScrollView>
+
+        <!-- Enhanced Loading Overlay -->
+        <ContentView 
+            x:Name="LoadingOverlay"
+            IsVisible="False"
+            BackgroundColor="#CC000000"
+            InputTransparent="False">
+            <StackLayout 
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="0">
+                <yummy:PancakeView
+                    Padding="40,36"
+                    BackgroundColor="#1A2332"
+                    CornerRadius="20"
+                    HasShadow="True"
+                    Elevation="16">
+                    <StackLayout Spacing="20">
+                        <!-- Custom Animated Loader -->
+                        <Grid HeightRequest="60" WidthRequest="60" HorizontalOptions="Center">
+                            <yummy:PancakeView
+                                x:Name="LoaderRing1"
+                                HeightRequest="60"
+                                WidthRequest="60"
+                                CornerRadius="30"
+                                BorderColor="#00D084"
+                                BorderThickness="4"
+                                BackgroundColor="Transparent"/>
+
+                            <yummy:PancakeView
+                                x:Name="LoaderRing2"
+                                HeightRequest="45"
+                                WidthRequest="45"
+                                CornerRadius="22.5"
+                                BorderColor="#0589da"
+                                BorderThickness="3"
+                                BackgroundColor="Transparent"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+
+                            <ActivityIndicator 
+                                IsRunning="True"
+                                Color="#0589da"
+                                HeightRequest="30"
+                                WidthRequest="30"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"/>
+                        </Grid>
+
+                        <Label
+                            x:Name="LoadingText"
+                            Text="Signing in..."
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center"/>
+
+                        <Label
+                            x:Name="LoadingSubtext"
+                            Text="Please wait while we verify your credentials"
+                            FontSize="12"
+                            TextColor="#90A4AE"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            MaxLines="2"/>
+                    </StackLayout>
+                </yummy:PancakeView>
+            </StackLayout>
+        </ContentView>
+
+        <!-- Error Toast Notification -->
+        <yummy:PancakeView
+            x:Name="ErrorToast"
+            IsVisible="False"
+            Margin="16"
+            Padding="16,12"
+            CornerRadius="12"
+            BackgroundColor="#D32F2F"
+            VerticalOptions="Start"
+            HorizontalOptions="Fill"
+            HasShadow="True"
+            Elevation="8"
+            TranslationY="-100">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Label
+                    Grid.Column="0"
+                    Text="⚠"
+                    FontSize="20"
+                    TextColor="White"
+                    VerticalOptions="Center"/>
+
+                <Label
+                    Grid.Column="1"
+                    x:Name="ErrorToastMessage"
+                    Text="An error occurred"
+                    FontSize="14"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    MaxLines="2"
+                    LineBreakMode="TailTruncation"/>
+
+                <Label
+                    Grid.Column="2"
+                    Text="✕"
+                    FontSize="18"
+                    TextColor="White"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDismissErrorToast"/>
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+        </yummy:PancakeView>
+
+    </Grid>
+
 </ContentPage>

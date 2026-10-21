@@ -3,15 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:themes="clr-namespace:Rickbolwa"
              x:Class="Rickbolwa.App">
     <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <themes:AppTheme/>
-            </ResourceDictionary.MergedDictionaries>
 
-            <Style TargetType="Page" ApplyToDerivedTypes="True">
-                <Setter Property="BackgroundColor"
-                       Value="{AppThemeBinding Dark={StaticResource PageBackgroundDark}, Light={StaticResource PageBackgroundLight}}"/>
-            </Style>
-        </ResourceDictionary>
     </Application.Resources>
 </Application>

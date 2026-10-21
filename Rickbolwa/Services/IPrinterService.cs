@@ -6,6 +6,15 @@ using System.Threading.Tasks;
 
 namespace Rickbolwa.Services
 {
+    // ══════════════════════════════════════════════════════════════
+    //  PRINTER SERVICE INTERFACE
+    // ══════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Abstraction over the physical Bluetooth printer.
+    /// Swap the real implementation for <see cref="MockPrinterService"/>
+    /// in unit tests or on the iOS simulator where no Bluetooth adapter exists.
+    /// </summary>
     public interface IPrinterService : IDisposable
     {
         /// <summary>Returns true when a paired, connectable printer is detected.</summary>
@@ -15,7 +24,7 @@ namespace Rickbolwa.Services
         Task PrintReceiptAsync(
             ReceiptData receipt,
             string logoAssetName = "Logo.png",
-            string watermarkText = Rickbolwa.Helper.BrandConfig.ReceiptWatermark,
+            string watermarkText = "RICKBOLWA",
             PrintRetryPolicy retryPolicy = null,
             IProgress<PrintProgress> progress = null,
             CancellationToken cancellationToken = default);
@@ -77,7 +86,7 @@ namespace Rickbolwa.Services
         public async Task PrintReceiptAsync(
             ReceiptData receipt,
             string logoAssetName = "Logo.png",
-            string watermarkText = Rickbolwa.Helper.BrandConfig.ReceiptWatermark,
+            string watermarkText = "RICKBOLWA",
             PrintRetryPolicy retryPolicy = null,
             IProgress<PrintProgress> progress = null,
             CancellationToken cancellationToken = default)

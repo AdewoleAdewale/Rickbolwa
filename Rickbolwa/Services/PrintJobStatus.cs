@@ -1,14 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
-using Xamarin.Essentials;
-using Formatting = Newtonsoft.Json.Formatting;
 
 namespace Rickbolwa.Services
 {
@@ -244,6 +240,9 @@ namespace Rickbolwa.Services
     ///   await _printJobManager.ResumeUnfinishedJobsAsync(progressHandler);
     /// </code>
     /// </summary>
+    /// 
+
+
     public class PrintJobManager : IDisposable
     {
         private readonly IPrinterService _printer;
@@ -286,6 +285,9 @@ namespace Rickbolwa.Services
             return job;
         }
 
+
+        public Task DeleteJobAsync(string jobId)
+     => _store.DeleteAsync(jobId);
         // ── Execute ───────────────────────────────────────────────
 
         /// <summary>
@@ -320,10 +322,6 @@ namespace Rickbolwa.Services
                 _executionLock.Release();
             }
         }
-
-
-        public Task DeleteJobAsync(string jobId)
-        => _store.DeleteAsync(jobId);
 
         // ── Resume unfinished jobs ────────────────────────────────
 
@@ -399,7 +397,7 @@ namespace Rickbolwa.Services
                 await _printer.PrintReceiptAsync(
                     job.Receipt,
                     job.LogoAssetName,
-                    Rickbolwa.Helper.BrandConfig.ReceiptWatermark,
+                    "YOBE IRS",
                     _policy,
                     wrappedProgress,
                     cancellationToken);

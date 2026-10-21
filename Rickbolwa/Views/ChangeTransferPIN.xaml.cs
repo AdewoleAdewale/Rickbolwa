@@ -1,8 +1,10 @@
 ﻿using Acr.UserDialogs;
 using Newtonsoft.Json;
+using Rickbolwa.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,155 +20,81 @@ namespace Rickbolwa.Views
         public ChangeTransferPIN()
         {
             InitializeComponent();
-        }
-        private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
-               => NavigateToDashboard();
-
-        protected override bool OnBackButtonPressed()
-        {
-            Device.BeginInvokeOnMainThread(NavigateToDashboard);
-            return true;
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => SessionManager.Instance.UpdateActivity();
+            this.Content.GestureRecognizers.Add(tapGesture);
         }
 
-        private void NavigateToDashboard()
+        private async void OnCancelClicked(object sender, EventArgs e)
         {
-            ContentPage dest;
-
-            switch (MainPage.category)
-            {
-           
-
-                default:
-                    dest = new Views.DashBoard();
-                    break;
-            }
-
-            Application.Current.MainPage = new NavigationPage(dest);
+            await Navigation.PopModalAsync();
         }
 
-        // ── Change PIN ───────────────────────────────────────────────────────
-        private async void TapGestureRecognizer_Tapped1(object sender, EventArgs e)
+        private async void OnUpdatePinClicked(object sender, EventArgs e)
         {
-            string oldPin = OldPINEntry.Text?.Trim();
-            string newPin = ConfirmPIN.Text?.Trim();
+            SessionManager.Instance.UpdateActivity();
 
-            // Validate old PIN
-            if (string.IsNullOrWhiteSpace(oldPin) || oldPin.Length < 4)
+            if (string.IsNullOrWhiteSpace(ConfirmPIN.Text) || string.IsNullOrWhiteSpace(OldPINEntry.Text))
             {
-                await DisplayAlert("Missing PIN", "Please enter your current 4-digit PIN.", "OK");
+                await Navigation.PushModalAsync(new WaterFailureSheet("Validation Error", "Please fill in all PIN fields."));
                 return;
             }
 
-            // Confirm old PIN matches locally stored PIN
-            if (oldPin != MainPage.Pin)
-            {
-                await DisplayAlert("Incorrect PIN",
-                    "The current PIN you entered is incorrect. Please try again.", "OK");
-                return;
-            }
-
-            // Validate new PIN
-            if (string.IsNullOrWhiteSpace(newPin) || newPin.Length != 4)
-            {
-                await DisplayAlert("Invalid PIN",
-                    "New PIN must be exactly 4 digits.", "OK");
-                return;
-            }
-
-            if (!System.Text.RegularExpressions.Regex.IsMatch(newPin, @"^\d{4}$"))
-            {
-                await DisplayAlert("Invalid PIN",
-                    "PIN must contain only numbers (0–9).", "OK");
-                return;
-            }
-
-            if (oldPin == newPin)
-            {
-                await DisplayAlert("Same PIN",
-                    "New PIN cannot be the same as your current PIN.", "OK");
-                return;
-            }
-
-            using (UserDialogs.Instance.Loading("Updating PIN…", null, null, true))
+            using (UserDialogs.Instance.Loading("Verifying...", null, null, true))
             {
                 await Task.Delay(1000);
-                await ChangePinAsync(newPin);
-            }
-        }
 
-        private async Task ChangePinAsync(string newPin)
-        {
-            string url = $"https://rickbolwa.osoftpay.net/api/taskpayers/ChangePin"
-                       + $"?UserName={Uri.EscapeDataString(MainPage.ValidUserMail)}"
-                       + $"&NewPin={Uri.EscapeDataString(newPin)}";
-
-            try
-            {
-                using (var handler = new HttpClientHandler
+                if (OldPINEntry.Text == MainPage.Pin)
                 {
-                    ServerCertificateCustomValidationCallback = (a, b, c, d) => Rickbolwa.Services.ApiClient.ValidateCertificate(a, b, c, d),
-                    SslProtocols = System.Security.Authentication.SslProtocols.Tls12
-                               | System.Security.Authentication.SslProtocols.Tls11
-                })
-                using (var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) })
-                {
-                    var response = await client.GetAsync(url).ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
+                    string url = $"https://rickbolwa.osoftpay.net/api/TaskPayers/ChangePin?UserName={MainPage.ValidUserMail}&NewPin={ConfirmPIN.Text}";
 
-                    string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var result = JsonConvert.DeserializeObject<InterfacePass>(json);
-
-                    await Device.InvokeOnMainThreadAsync(async () =>
+                    try
                     {
-                        if (result?.status == "00")
+                        using (var httpClientHandler = new HttpClientHandler())
                         {
-                            App.IsUserLoggedIn = false;
-                            await DisplayAlert("✅ PIN Updated",
-                                "Your PIN has been changed successfully. Please log in again.",
-                                "OK");
-                            Application.Current.MainPage = new NavigationPage(new MainPage());
+                            httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+
+                            using (HttpClient client = new HttpClient(httpClientHandler))
+                            {
+                                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+                                using (HttpResponseMessage response = await client.GetAsync(url))
+                                {
+                                    var json = await response.Content.ReadAsStringAsync();
+                                    var result = JsonConvert.DeserializeObject<InterfacePass>(json);
+
+                                    if (result != null && result.status == "00")
+                                    {
+                                        App.IsUserLoggedIn = false;
+
+                                        await Navigation.PushModalAsync(new WaterSuccessSheet(
+                                            "PIN Updated",
+                                            "Transaction PIN changed successfully. Please login again.",
+                                            "PIN-UPDATE",
+                                            "Successful",
+                                            async () =>
+                                            {
+                                                Application.Current.MainPage = new NavigationPage(new MainPage());
+                                            }));
+                                    }
+                                    else
+                                    {
+                                        await Navigation.PushModalAsync(new WaterFailureSheet("Update Failed", "Error, PIN was not changed!"));
+                                    }
+                                }
+                            }
                         }
-                        else
-                        {
-                            await DisplayAlert("Update Failed",
-                                result?.Message ?? "PIN could not be changed. Please try again.",
-                                "OK");
-                        }
-                    });
+                    }
+                    catch (Exception ex)
+                    {
+                        await Navigation.PushModalAsync(new WaterFailureSheet("Network Error", "Check your internet connection."));
+                    }
+                }
+                else
+                {
+                    await Navigation.PushModalAsync(new WaterFailureSheet("Verification Failed", "Can't confirm your old PIN. Please try again."));
                 }
             }
-            catch (HttpRequestException httpEx)
-            {
-                await Device.InvokeOnMainThreadAsync(() =>
-                    DisplayAlert("Connection Error",
-                        $"Unable to update PIN.\n\n{httpEx.Message}", "Retry"));
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[ChangeTransferPIN] Error: {ex}");
-                await Device.InvokeOnMainThreadAsync(() =>
-                    DisplayAlert("Error",
-                        "An unexpected error occurred. Check your internet and try again.", "OK"));
-            }
         }
-    }
-
-    internal class InterfacePass
-    {
-        public string MerchantSubUser { get; set; }
-
-        public string status { get; set; }
-
-        public string statusCode { get; set; }
-        public string statusMessage { get; set; }
-
-
-        public string Password { get; set; }
-
-        public string PhoneNumber { get; set; }
-
-        public string FullName { get; set; }
-
-        public string Message { get; set; }
     }
 }

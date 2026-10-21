@@ -1,12 +1,5 @@
-﻿using Android.App;
-using Android.Bluetooth;
-using Android.Content;
-using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
+﻿using Android.Bluetooth;
 using Java.Util;
-using Rickbolwa.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Rickbolwa.Droid.Services
+namespace Rickbolwa.Services
 {
     // ══════════════════════════════════════════════════════════════
     //  PRINTER HEALTH REPORT
@@ -122,8 +115,9 @@ namespace Rickbolwa.Droid.Services
                     return Report(PrinterHealthStatus.BluetoothOff, null,
                                   "Bluetooth adapter is disabled.");
 
-                var device = adapter.BondedDevices?
-                    .FirstOrDefault(d => SupportedPrinters.Contains(d.Name ?? string.Empty));
+                // Same discovery as the print service: built-in printer by MAC first,
+                // then known external printer names.
+                var device = BluetoothPrinterService.FindPrinterDevice(adapter);
 
                 if (device == null)
                     return Report(PrinterHealthStatus.NoPairedDevice, null,
@@ -249,7 +243,7 @@ namespace Rickbolwa.Droid.Services
 
             foreach (var device in adapter.BondedDevices ?? Enumerable.Empty<BluetoothDevice>())
             {
-                if (SupportedPrinters.Contains(device.Name ?? string.Empty))
+                if (BluetoothPrinterService.IsSupportedPrinter(device))
                 {
                     result.Add(new PairedPrinterInfo
                     {

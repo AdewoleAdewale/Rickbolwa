@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Rickbolwa.Views.WaterSuccessSheet"             BackgroundColor="#80000000">
+
+    <Grid VerticalOptions="End">
+        <Frame BackgroundColor="White" CornerRadius="24" Padding="20,24" HasShadow="True" Margin="0,0,0,-10">
+            <StackLayout Spacing="14">
+
+                <!-- Success Icon -->
+                <Frame BackgroundColor="#E3F7EF" CornerRadius="30" HeightRequest="60" WidthRequest="60" 
+                       Padding="0" HasShadow="False" HorizontalOptions="Center">
+                    <Label Text="✓" TextColor="#0E8A57" FontSize="28" FontAttributes="Bold" 
+                           HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Frame>
+
+                <Label x:Name="TitleLabel" Text="Action Successful" FontAttributes="Bold" FontSize="18" 
+                       TextColor="#1A1A1A" HorizontalTextAlignment="Center"/>
+                <Label x:Name="MessageLabel" Text="Your request has been processed successfully." 
+                       TextColor="#666" FontSize="12" HorizontalTextAlignment="Center"/>
+
+                <!-- Dynamic Data Box -->
+                <Frame BackgroundColor="#F8FAF9" CornerRadius="12" Padding="14" HasShadow="False" BorderColor="#E2ECE7">
+                    <StackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="Reference / ID:" FontSize="11" TextColor="#777"/>
+                            <Label Grid.Column="1" x:Name="RefLabel" FontAttributes="Bold" FontSize="12" TextColor="#063E2A"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label Text="Amount:" FontSize="11" TextColor="#777"/>
+                            <Label Grid.Column="1" x:Name="AmountLabel" FontAttributes="Bold" FontSize="12" TextColor="#0E8A57"/>
+                        </Grid>
+                    </StackLayout>
+                </Frame>
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,10,0,10">
+                    <Button x:Name="PrintBtn" Grid.Column="0" Text="Print Slip" BackgroundColor="#063E2A" 
+                            TextColor="White" FontAttributes="Bold" CornerRadius="10" HeightRequest="46" Clicked="OnPrintClicked"/>
+                    <Button Grid.Column="1" Text="Done" BackgroundColor="#F0F3F4" 
+                            TextColor="#333" FontAttributes="Bold" CornerRadius="10" HeightRequest="46" Clicked="OnDoneClicked"/>
+                </Grid>
+            </StackLayout>
+        </Frame>
+    </Grid>
+</ContentPage>

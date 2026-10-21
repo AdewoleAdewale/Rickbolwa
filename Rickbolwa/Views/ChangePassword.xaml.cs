@@ -1,8 +1,10 @@
 ﻿using Acr.UserDialogs;
 using Newtonsoft.Json;
+using Rickbolwa.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -19,145 +21,98 @@ namespace Rickbolwa.Views
         public ChangePassword()
         {
             InitializeComponent();
+
+
         }
 
-        // ── Navigation ───────────────────────────────────────────────────────
-        private void TapGestureRecognizer_Tapped(object sender, EventArgs e)
-            => NavigateToDashboard();
-
-        protected override bool OnBackButtonPressed()
+        private void TrackUserActivity()
         {
-            Device.BeginInvokeOnMainThread(NavigateToDashboard);
-            return true;
+            // Add tap gesture to main grid to track any user interaction
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += (s, e) => SessionManager.Instance.UpdateActivity();
+            this.Content.GestureRecognizers.Add(tapGesture);
         }
 
-        private void NavigateToDashboard()
+
+        private async void OnCancelClicked(object sender, EventArgs e)
         {
-            ContentPage dest;
-
-            switch (MainPage.category)
-            {
-             
-
-                default:
-                    dest = new Views.DashBoard();
-                    break;
-            }
-
-            Application.Current.MainPage = new NavigationPage(dest);
+            await Navigation.PopModalAsync();
         }
 
-        // ── Change password ───────────────────────────────────────────────────
-        private async void TapGestureRecognizer_Tapped_1(object sender, EventArgs e)
+        private async void OnUpdatePasswordClicked(object sender, EventArgs e)
         {
-            string newPass = ConfirmPassword.Text?.Trim();
+            SessionManager.Instance.UpdateActivity();
 
-            // Client-side validation
-            if (string.IsNullOrWhiteSpace(OldPasswordEntry.Text))
+            if (string.IsNullOrWhiteSpace(ConfirmPassword.Text) || string.IsNullOrWhiteSpace(OldPasswordEntry.Text))
             {
-                await DisplayAlert("Missing Field", "Please enter your current password.", "OK");
-                return;
-            }
-            if (string.IsNullOrWhiteSpace(newPass) || newPass.Length < 8)
-            {
-                await DisplayAlert("Weak Password",
-                    "New password must be at least 8 characters long.", "OK");
-                return;
-            }
-            if (!Regex.IsMatch(newPass, @"[A-Z]"))
-            {
-                await DisplayAlert("Weak Password",
-                    "New password must contain at least one uppercase letter.", "OK");
-                return;
-            }
-            if (!Regex.IsMatch(newPass, @"[!@#$%^&*(),.?\"":{}|<>]"))
-            {
-                await DisplayAlert("Weak Password",
-                    "New password must contain at least one special character.", "OK");
+                await Navigation.PushModalAsync(new WaterFailureSheet("Validation Error", "Please fill in all password fields."));
                 return;
             }
 
-            using (UserDialogs.Instance.Loading("Updating password…", null, null, true))
+            using (UserDialogs.Instance.Loading("Verifying...", null, null, true))
             {
                 await Task.Delay(1000);
-                await ChangePasswordAsync(newPass);
-            }
-        }
 
-        private async Task ChangePasswordAsync(string newPassword)
-        {
-            string url = $"https://rickbolwa.osoftpay.net/api/TaskPayers/ChangePassword"
-                       + $"?UserName={Uri.EscapeDataString(MainPage.ValidUserMail)}"
-                       + $"&NewPassword={Uri.EscapeDataString(newPassword)}";
+                string url = $"https://rickbolwa.osoftpay.net/api/TaskPayers/ChangePassword?UserName={MainPage.ValidUserMail}&NewPassword={ConfirmPassword.Text}";
 
-            try
-            {
-                using (var handler = new HttpClientHandler
+                try
                 {
-                    ServerCertificateCustomValidationCallback = (a, b, c, d) => Rickbolwa.Services.ApiClient.ValidateCertificate(a, b, c, d),
-                    SslProtocols = System.Security.Authentication.SslProtocols.Tls12
-                                   | System.Security.Authentication.SslProtocols.Tls11
-                })
-                using (var client = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(30) })
-                {
-                    var response = await client.GetAsync(url).ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-
-                    string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var result = JsonConvert.DeserializeObject<InterfacePass>(json);
-
-                    await Device.InvokeOnMainThreadAsync(async () =>
+                    using (var httpClientHandler = new HttpClientHandler())
                     {
-                        if (result?.status == "00")
+                        httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+
+                        using (HttpClient client = new HttpClient(httpClientHandler))
                         {
-                            App.IsUserLoggedIn = false;
-                            await DisplayAlert("✅ Password Updated",
-                                "Your password has been changed successfully. Please log in again.",
-                                "OK");
-                            Application.Current.MainPage = new NavigationPage(new MainPage());
+                            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                            using (HttpResponseMessage response = await client.GetAsync(url))
+                            {
+                                var json = await response.Content.ReadAsStringAsync();
+                                var result = JsonConvert.DeserializeObject<InterfacePass>(json);
+
+                                if (result != null && result.status == "00")
+                                {
+                                    App.IsUserLoggedIn = false;
+
+                                    // Show Success Sheet and redirect to Login on close
+                                    await Navigation.PushModalAsync(new WaterSuccessSheet(
+                                        "Password Updated",
+                                        "Your password was changed successfully. Please login again.",
+                                        "PWD-UPDATE",
+                                        "Successful",
+                                        async () =>
+                                        {
+                                            // Action when user clicks "Done" on success sheet
+                                            Application.Current.MainPage = new NavigationPage(new MainPage());
+                                        }));
+                                }
+                                else
+                                {
+                                    await Navigation.PushModalAsync(new WaterFailureSheet("Update Failed", "Error, Password was not changed!"));
+                                }
+                            }
                         }
-                        else
-                        {
-                            await DisplayAlert("Update Failed",
-                                result?.Message ?? "Password could not be changed. Please try again.",
-                                "OK");
-                        }
-                    });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    await Navigation.PushModalAsync(new WaterFailureSheet("Network Error", "Check your internet connection."));
                 }
             }
-            catch (HttpRequestException httpEx)
-            {
-                await Device.InvokeOnMainThreadAsync(() =>
-                    DisplayAlert("Connection Error",
-                        $"Unable to update password.\n\n{httpEx.Message}", "Retry"));
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"[ChangePassword] Error: {ex}");
-                await Device.InvokeOnMainThreadAsync(() =>
-                    DisplayAlert("Error",
-                        "An unexpected error occurred. Please check your internet and try again.",
-                        "OK"));
-            }
         }
-
-        internal class InterfacePass
-        {
-            public string MerchantSubUser { get; set; }
-
-            public string status { get; set; }
-
-            public string statusCode { get; set; }
-            public string statusMessage { get; set; }
+    }
 
 
-            public string Password { get; set; }
 
-            public string PhoneNumber { get; set; }
+    internal class InterfacePass
+    {
+        public string MerchantSubUser { get; set; }
 
-            public string FullName { get; set; }
+        public string status { get; set; }
 
-            public string Message { get; set; }
-        }
+        public string Password { get; set; }
+
+        public string PhoneNumber { get; set; }
+
+        public string FullName { get; set; }
     }
 }

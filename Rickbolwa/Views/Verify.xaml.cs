@@ -1,8 +1,11 @@
 ﻿using Acr.UserDialogs;
 using Android.Accounts;
 using Newtonsoft.Json;
+using Rickbolwa.Services;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -19,188 +22,246 @@ namespace Rickbolwa.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Verify : ContentPage
     {
-  
-            public static string nameofDriverss { get; set; }
-            public static string plateNumberss { get; set; }
-            public static string ownerPhoness { get; set; }
-            public static string statess { get; set; }
-            public static string lgass { get; set; }
-            public static string vehicleTypess { get; set; }
-            public static string messagess { get; set; }
-            public static string statusCodess { get; set; }
-            public static string amountss { get; set; }
-            public static string recordedByss { get; set; }
-            public static string dateRecordedss { get; set; }
+        public static string nameofDriverss { get; set; }
+        public static string plateNumberss { get; set; }
+        public static string ownerPhoness { get; set; }
+        public static string statess { get; set; }
+        public static string lgass { get; set; }
+        public static string vehicleTypess { get; set; }
+        public static string messagess { get; set; }
+        public static string statusCodess { get; set; }
+        public static string amountss { get; set; }
+        public static string recordedByss { get; set; }
+        public static string dateRecordedss { get; set; }
 
-            public Verify()
+        public static string destinationFromss { get; set; }
+        public static string destinationToss { get; set; }
+
+        public Verify()
+        {
+            InitializeComponent();
+            ConfigureSSL();
+            TrackUserActivity();
+
+            // Restore previous result if it exists
+            if (plateNumberss != null)
             {
-                InitializeComponent();
+                PopulateResultPanel();
+                ShowResultPanel();
+            }
+            else
+            {
+                EmptyState.IsVisible = true;
+                ResultPanel.IsVisible = false;
+            }
+        }
 
-                nameofDrivers.Text = Verify.nameofDriverss;
-                plateNumbers.Text = Verify.plateNumberss;
-                lga.Text = Verify.lgass;
-                Amount.Text = Verify.amountss;
-                vehicleTypes.Text = Verify.vehicleTypess;
-                messages.Text = Verify.messagess;
-                DateRecorded.Text = Verify.dateRecordedss;
-                ownerPhones.Text = Verify.ownerPhoness;
+        private void PopulateResultPanel()
+        {
+            nameofDrivers.Text = nameofDriverss ?? "—";
+            plateNumbers.Text = plateNumberss ?? "—";
+            lga.Text = lgass ?? "—";
+            Amount.Text = amountss ?? "—";
+            vehicleTypes.Text = vehicleTypess ?? "—";
+            messages.Text = messagess ?? "—";
+            DateRecorded.Text = dateRecordedss ?? "—";
+            ownerPhones.Text = ownerPhoness ?? "—";
 
-                if (Verify.plateNumberss != null)
+            SessionManager.Instance.UpdateActivity();
+            // Status badge colour
+            bool paid = (statusCodess == "00");
+            StatusBadge.BackgroundColor = paid ? Color.FromHex("#00FF8820") : Color.FromHex("#FFAA4420");
+            StatusBadge.BorderColor = paid ? Color.FromHex("#00FF8860") : Color.FromHex("#FFAA4460");
+            StatusBadgeText.Text = paid ? "PAID" : "PENDING";
+            StatusBadgeText.TextColor = paid ? Color.Red : Color.Blue;
+        }
+
+        private void ShowResultPanel()
+        {
+            EmptyState.IsVisible = false;
+            ResultPanel.IsVisible = true;
+            makePaymentPanel.IsVisible = plateNumberss != null;
+        }
+
+        private void ConfigureSSL()
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
+            ServicePointManager.ServerCertificateValidationCallback =
+                new RemoteCertificateValidationCallback(ValidateServerCertificate);
+            ServicePointManager.DefaultConnectionLimit = 10;
+            ServicePointManager.Expect100Continue = true;
+        }
+
+        private bool ValidateServerCertificate(object sender, X509Certificate certificate,
+            X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None) return true;
+            System.Diagnostics.Debug.WriteLine($"SSL Error: {sslPolicyErrors}");
+            return true;
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            Device.BeginInvokeOnMainThread(async () =>
+            {
+                using (UserDialogs.Instance.Loading("Please wait…", null, null, true))
                 {
-                    make.IsVisible = true;
+                    await Task.Delay(10);
+
+                    SessionManager.Instance.UpdateActivity();
+                    await Navigation.PushModalAsync(new Views.DashBoard());
                 }
-                else
+            });
+            return true;
+        }
+
+        // ─── Clear search ────────────────────────────────────────────────────
+
+        private void ClearSearch_Tapped(object sender, EventArgs e)
+        {
+            Search.Text = string.Empty;
+            ResultPanel.IsVisible = false;
+            EmptyState.IsVisible = true;
+        }
+
+        // ─── Search / Verify ─────────────────────────────────────────────────
+
+        private async void TapGestureRecognizer_Tapped_1(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(Search.Text))
+            {
+                UserDialogs.Instance.Toast("Please enter a plate number.", TimeSpan.FromSeconds(3));
+
+                SessionManager.Instance.UpdateActivity();
+                return;
+            }
+
+            using (UserDialogs.Instance.Loading("Verifying plate number…", null, null, true))
+            {
+                await Task.Delay(600);
+
+                string url = $"https://rickbolwa.osoftpay.net/api/HulageVehicles/verify?PlateNumber={Search.Text.Trim().ToUpper()}";
+
+                try
                 {
-                    make.IsVisible = false;
-                }
-
-                ConfigureSSL();
-            }
-
-            private void ConfigureSSL()
-            {
-                // Configure SSL/TLS settings to handle certificate issues
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
-
-                // Set ServerCertificateValidationCallback to handle certificate validation
-                ServicePointManager.ServerCertificateValidationCallback =
-                    new RemoteCertificateValidationCallback(ValidateServerCertificate);
-
-                // Increase connection limits
-                ServicePointManager.DefaultConnectionLimit = 10;
-                ServicePointManager.Expect100Continue = true;
-            }
-
-            private bool ValidateServerCertificate(
-                object sender,
-                X509Certificate certificate,
-                X509Chain chain,
-                SslPolicyErrors sslPolicyErrors)
-            {
-                // For production, you should implement proper certificate validation
-                // This accepts all certificates - use with caution
-
-                if (sslPolicyErrors == SslPolicyErrors.None)
-                    return true;
-
-                // Log the SSL error for debugging
-                System.Diagnostics.Debug.WriteLine($"SSL Error: {sslPolicyErrors}");
-
-                return Rickbolwa.Services.ApiClient.ValidateCertificate(sender, certificate, chain, sslPolicyErrors);
-            }
-
-
-
-
-            protected override bool OnBackButtonPressed()
-            {
-                Device.BeginInvokeOnMainThread(async () =>
-                {
-
-                    using (UserDialogs.Instance.Loading("Connecting to Service, Please Wait...", null, null, true))
+                    var handler = new HttpClientHandler
                     {
-                        await Task.Delay(10);
+                        ServerCertificateCustomValidationCallback = (m, c, ch, e2) => true,
+                        SslProtocols = System.Security.Authentication.SslProtocols.Tls12
+                                     | System.Security.Authentication.SslProtocols.Tls11
+                    };
 
-                        await Navigation.PushModalAsync(new Views.DashBoard());
-                    }
-
-                });
-                return true;
-            }
-            private async void TapGestureRecognizer_Tapped_1(object sender, EventArgs e)
-            {
-                using (UserDialogs.Instance.Loading("Connecting to Service, Please Wait...", null, null, true))
-                {
-                    await Task.Delay(1000);
-
-                    string url = "https://rickbolwa.osoftpay.net/api/HulageVehicles/verify?PlateNumber=" + Search.Text.Trim();
-                    try
+                    using (var client = new HttpClient(handler))
                     {
-                        var handler = new HttpClientHandler
-                        {
-                            ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => Rickbolwa.Services.ApiClient.ValidateCertificate(message, cert, chain, errors),
-                            SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls11
-                        };
+                        client.DefaultRequestHeaders.Accept.Add(
+                            new MediaTypeWithQualityHeaderValue("application/json"));
 
-                        using (HttpClient client = new HttpClient(handler))
+                        using (var response = await client.GetAsync(url))
                         {
-                            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            var json = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<HaulageVerifyResponse>(json);
 
-                            using (HttpResponseMessage response = client.GetAsync(url).Result)
+                            if (result != null && !string.IsNullOrEmpty(result.plateNumber))
                             {
-                                using (HttpContent content = response.Content)
+                                nameofDriverss = result.nameofDriver;
+                                plateNumberss = result.plateNumber;
+                                lgass = result.lga;
+                                amountss = result.amount;
+                                vehicleTypess = result.vehicleType;
+                                ownerPhoness = result.ownerPhone;
+                                messagess = result.message;
+                                statusCodess = result.statusCode;
+                                recordedByss = result.recordedBy;
+                                dateRecordedss = result.dateRecorded;
+                                destinationFromss = result.destinationFrom;
+                                destinationToss = result.destinationTo;
+
+                                await Application.Current.SavePropertiesAsync();
+
+                                Device.BeginInvokeOnMainThread(() =>
                                 {
-                                    var json = content.ReadAsStringAsync().Result;
-                                    HaulageVerifyResponse result = JsonConvert.DeserializeObject<HaulageVerifyResponse>
-                                        (json);
-                                    if (result != null)
-                                    {
-                                        nameofDriverss = result.nameofDriver;
-                                        plateNumberss = result.plateNumber;
-                                        lgass = result.lga;
-                                        amountss = result.amount;
-                                        vehicleTypess = result.vehicleType;
-                                        ownerPhoness = result.ownerPhone;
-                                        messagess = result.message;
-                                        statusCodess = result.statusCode;
+                                    PopulateResultPanel();
+                                    ShowResultPanel();
+                                });
+                            }
+                            else
+                            {
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    ResultPanel.IsVisible = false;
+                                    EmptyState.IsVisible = true;
+                                });
 
-                                        recordedByss = result.recordedBy;
-                                        dateRecordedss = result.dateRecorded;
-
-                                        await Application.Current.SavePropertiesAsync();
-                                        await Navigation.PushAsync(new Verify());
-
-
-
-                                    }
-                                    else
-                                    {
-                                        await DisplayAlert("NOTIFICATION", "Can't Verify VECHICLE Plate Number", "TRY AGAIN");
-
-                                        await Navigation.PushAsync(new Verify());
-
-                                    }
-                                }
-
+                                UserDialogs.Instance.Toast(
+                                    $"No vehicle found for plate: {Search.Text.Trim().ToUpper()}",
+                                    TimeSpan.FromSeconds(5));
                             }
                         }
-
-                    }
-                    catch (Exception exe)
-                    {
-                        UserDialogs.Instance.Toast("Network Error, Cant Verify Now Try Again", TimeSpan.FromSeconds(10));
-
-                        exe.ToString();
                     }
                 }
+                catch (Exception ex)
+                {
+                    UserDialogs.Instance.Toast(
+                        "Network error — please check your connection and try again.",
+                        TimeSpan.FromSeconds(6));
+                    System.Diagnostics.Debug.WriteLine($"[HaulageVerify] {ex.Message}");
+                }
             }
+        }
+        private async void make_Clicked(object sender, EventArgs e)
+            => await Navigation.PushAsync(new Payment());
 
-            private async void make_Clicked(object sender, EventArgs e)
+        private void TrackUserActivity()
+        {
+            try
             {
-                await Navigation.PushAsync(new  Payment());
+                var tapGesture = new TapGestureRecognizer();
+                tapGesture.Tapped += (s, e) => SessionManager.Instance.UpdateActivity();
+                if (this.Content != null)
+                    this.Content.GestureRecognizers.Add(tapGesture);
             }
-
-            internal class HaulageVerifyResponse
+            catch (Exception ex)
             {
-                public string nameofDriver { get; set; }
-                public string plateNumber { get; set; }
-                public string ownerPhone { get; set; }
-                public string state { get; set; }
-                public string lga { get; set; }
-                public string vehicleType { get; set; }
-                public string message { get; set; }
-                public string statusCode { get; set; }
-                public string amount { get; set; }
-                public string recordedBy { get; set; }
-                public string dateRecorded { get; set; }
-
-
+                LogError("TrackUserActivity", ex);
             }
+        }
 
+        private void LogError(string method, Exception ex)
+        {
+            try
+            {
+                Debug.WriteLine($"[ERROR] {DateTime.Now:yyyy-MM-dd HH:mm:ss} | {method}");
+                Debug.WriteLine($"[ERROR] Message: {ex?.Message}");
+                Debug.WriteLine($"[ERROR] StackTrace: {ex?.StackTrace}");
 
+                string logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "RICKBOLWA", "Logs");
+                if (!Directory.Exists(logDir)) Directory.CreateDirectory(logDir);
 
+                string logFile = Path.Combine(logDir, $"error_log_{DateTime.Now:yyyy-MM-dd}.txt");
+                File.AppendAllText(logFile,
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {method}: {ex?.Message}\n{ex?.StackTrace}\n\n");
+            }
+            catch { }
+        }
 
+        internal class HaulageVerifyResponse
+        {
+            public string nameofDriver { get; set; }
+            public string plateNumber { get; set; }
+            public string ownerPhone { get; set; }
+            public string state { get; set; }
+            public string lga { get; set; }
+            public string vehicleType { get; set; }
+            public string message { get; set; }
+            public string statusCode { get; set; }
+            public string amount { get; set; }
+            public string recordedBy { get; set; }
+            public string dateRecorded { get; set; }
 
+            public string destinationFrom { get; set; }
+            public string destinationTo { get; set; }
         }
     }
+}
