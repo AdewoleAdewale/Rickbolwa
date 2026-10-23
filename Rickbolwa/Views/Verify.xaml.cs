@@ -34,14 +34,6 @@ namespace Rickbolwa.Views
         public static string recordedByss { get; set; }
         public static string dateRecordedss { get; set; }
 
-        // Compatibility aliases for existing references across Rickbolwa
-        public static string customerNamess { get => nameofDriverss; set => nameofDriverss = value; }
-        public static string EnumerationIDss { get => plateNumberss; set => plateNumberss = value; }
-        public static string phoneNumberss { get => ownerPhoness; set => ownerPhoness = value; }
-        public static string vehicleColorss { get => lgass; set => lgass = value; }
-        public static string chasisNumberss { get => messagess; set => messagess = value; }
-        public static string addressss { get => statess; set => statess = value; }
-
         public Verify()
         {
             InitializeComponent();
@@ -145,7 +137,8 @@ namespace Rickbolwa.Views
             {
                 await Task.Delay(600);
 
-                string url = $"https://rickbolwa.osoftpay.net/api/HulageVehicles/verify?PlateNumber={Search.Text.Trim().ToUpper()}";
+                string url = "https://rickbolwa.osoftpay.net/api/HulageVehicles/verify?PlateNumber="
+                             + Uri.EscapeDataString(Search.Text.Trim().ToUpper());
 
                 try
                 {
@@ -168,12 +161,9 @@ namespace Rickbolwa.Views
 
                             if (result != null && !string.IsNullOrEmpty(result.plateNumber))
                             {
-                              
-                                dateRecordedss = result.dateRecorded;
                                 nameofDriverss = result.nameofDriver;
                                 plateNumberss = result.plateNumber;
                                 lgass = result.lga;
-                                statess = result.state;
                                 amountss = result.amount;
                                 vehicleTypess = result.vehicleType;
                                 ownerPhoness = result.ownerPhone;
@@ -199,7 +189,9 @@ namespace Rickbolwa.Views
                                 });
 
                                 UserDialogs.Instance.Toast(
-                                    $"No vehicle found for plate: {Search.Text.Trim().ToUpper()}",
+                                    !string.IsNullOrWhiteSpace(result?.message)
+                                        ? result.message
+                                        : $"No vehicle found for plate: {Search.Text.Trim().ToUpper()}",
                                     TimeSpan.FromSeconds(5));
                             }
                         }

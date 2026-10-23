@@ -27,24 +27,17 @@ namespace Rickbolwa.Views
 
         private async void OnCancelClicked(object sender, EventArgs e)
         {
-            SessionManager.Instance.UpdateActivity();
-            await NavigateBackSafelyAsync();
-        }
-
-        private async Task NavigateBackSafelyAsync()
-        {
-            if (Navigation.ModalStack != null && Navigation.ModalStack.Count > 0)
+            try
             {
-                await Navigation.PopModalAsync();
+                // This page is opened with PushAsync (DashBoard), so the modal stack is empty.
+                // Pop whichever way the page was actually presented.
+                var modals = Navigation.ModalStack;
+                if (modals.Count > 0 && modals[modals.Count - 1] == this)
+                    await Navigation.PopModalAsync();
+                else if (Navigation.NavigationStack.Count > 1)
+                    await Navigation.PopAsync();
             }
-            else if (Navigation.NavigationStack != null && Navigation.NavigationStack.Count > 1)
-            {
-                await Navigation.PopAsync();
-            }
-            else
-            {
-                Application.Current.MainPage = new NavigationPage(new Views.DashBoard());
-            }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[Cancel] {ex.Message}"); }
         }
 
         private async void OnUpdatePinClicked(object sender, EventArgs e)

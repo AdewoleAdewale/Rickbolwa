@@ -1,5 +1,4 @@
 ﻿using Acr.UserDialogs;
-using Android.Accounts;
 using DIPS.Xamarin.UI.Controls.Sheet;
 using Newtonsoft.Json;
 using Rickbolwa.Services;
@@ -40,6 +39,18 @@ namespace Rickbolwa.Views
         private bool _isPrinting;
         private bool _isFormValid;
 
+        // Same state list the Borno haulage payment loads into its picker.
+        private const string StateUrl = BaseUrl + "/api/taskpayers/getstate";
+
+        private static readonly string[] FallbackStates =
+        {
+            "Abia","Adamawa","Akwa Ibom","Anambra","Bauchi","Bayelsa","Benue","Borno","Cross River",
+            "Delta","Ebonyi","Edo","Ekiti","Enugu","FCT","Gombe","Imo","Jigawa","Kaduna","Kano",
+            "Katsina","Kebbi","Kogi","Kwara","Lagos","Nasarawa","Niger","Ogun","Ondo","Osun","Oyo",
+            "Plateau","Rivers","Sokoto","Taraba","Yobe","Zamfara"
+        };
+
+        private List<GetSateCatData> _states = new List<GetSateCatData>();
         private string _destination = string.Empty;
         private decimal _expectedAmount;
 
@@ -59,6 +70,7 @@ namespace Rickbolwa.Views
                 LoadingOverlay.IsVisible = false;
                 TrackUserActivity();
                 LoadVerifiedDetails();
+                _ = LoadStatesAsync();
                 Validate();
             }
             catch (Exception ex)
@@ -106,9 +118,9 @@ namespace Rickbolwa.Views
         // ───────────────────────── Verified details ─────────────────────────
 
         /// <summary>
-        /// Every field except the PIN comes from the verified vehicle record.
-        /// Destination To is resolved from Verify, falling back to the vehicle's LGA
-        /// only if the verify response did not carry a destination.
+        /// Service name, plate and amount come from the verified vehicle record. The destination
+        /// state is picked here (as in the Borno haulage payment). If the verified amount is zero
+        /// the Amount field becomes editable, again matching Borno.
         /// </summary>
         private void LoadVerifiedDetails()
         {
@@ -117,18 +129,13 @@ namespace Rickbolwa.Views
                 Servicename.Text = SafeString(Verify.vehicleTypess, "—");
                 PayerId.Text = SafeString(Verify.plateNumberss, "—");
 
-                _destination = ResolveDestination();
-                DestinationTo.Text = SafeString(_destination, "—");
-
-                var hasDestination = !string.IsNullOrWhiteSpace(_destination);
-                destinationBadge.Text = hasDestination ? "VERIFIED" : "MISSING";
-                destinationBadge.TextColor = hasDestination ? Color.Black : Color.ForestGreen;
-                destinationError.IsVisible = !hasDestination;
-
                 _expectedAmount = ParseAmount(Verify.amountss);
                 Amount.Text = _expectedAmount > 0
                     ? _expectedAmount.ToString("N2", CultureInfo.InvariantCulture)
-                    : SafeString(Verify.amountss);
+                    : SafeString(Verify.amountss, "0");
+
+                Amount.IsReadOnly = _expectedAmount > 0;
+                Amount.IsEnabled = true;
 
                 UpdateAmountHeadline();
             }
@@ -138,23 +145,63 @@ namespace Rickbolwa.Views
             }
         }
 
-        private static string ResolveDestination()
+        private async Task LoadStatesAsync()
         {
+            List<GetSateCatData> items = null;
+
             try
             {
-                // Verify.destinationToss is the primary source; lga is the legacy fallback.
-                var destination = SafeString(Verify.lgass);
-
-                if (string.IsNullOrWhiteSpace(destination))
-                    destination = SafeString(Verify.lgass);
-
-                return destination;
+                using (var response = await Http.GetAsync(StateUrl).ConfigureAwait(true))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await SafeReadAsync(response).ConfigureAwait(true);
+                        if (!string.IsNullOrWhiteSpace(json))
+                            items = JsonConvert.DeserializeObject<List<GetSateCatData>>(json,
+                                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Log("ResolveDestination", ex);
-                return string.Empty;
+                Log("LoadStates", ex);
             }
+
+            // If the endpoint is missing or empty, fall back to the standard Nigerian state list
+            // so the operator is never blocked from taking payment.
+            if (items == null || items.Count == 0 || items.All(i => string.IsNullOrWhiteSpace(i?.name)))
+                items = FallbackStates.Select(n => new GetSateCatData { name = n }).ToList();
+
+            _states = items.Where(i => !string.IsNullOrWhiteSpace(i?.name)).ToList();
+
+            try
+            {
+                picker.ItemDisplayBinding = new Binding("name");
+                picker.ItemsSource = _states;
+            }
+            catch (Exception ex)
+            {
+                Log("BindStates", ex);
+            }
+
+            Validate();
+        }
+
+        private void OnStateChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                var selected = picker.SelectedItem as GetSateCatData;
+                _destination = selected?.name?.Trim() ?? string.Empty;
+
+                var ok = !string.IsNullOrWhiteSpace(_destination);
+                destinationBadge.Text = ok ? "✓ SELECTED" : "REQUIRED";
+                destinationBadge.TextColor = ok ? Color.FromHex("#00893E") : Color.FromHex("#FF6B6B");
+                destinationError.IsVisible = false;
+
+                Validate();
+            }
+            catch (Exception ex) { Log("OnStateChanged", ex); }
         }
 
         // ───────────────────────── Networking setup ─────────────────────────
@@ -165,7 +212,7 @@ namespace Rickbolwa.Views
             {
                 var handler = new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (m, c, ch, er) => true
+                    ServerCertificateCustomValidationCallback = (m, c, ch, er) => ApiClient.ValidateCertificate(m, c, ch, er)
                 };
 
                 try
@@ -192,7 +239,7 @@ namespace Rickbolwa.Views
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
-                ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, er) => true;
+                ServicePointManager.ServerCertificateValidationCallback = (s, c, ch, er) => ApiClient.ValidateCertificate(s, c, ch, er);
                 ServicePointManager.DefaultConnectionLimit = 10;
                 ServicePointManager.Expect100Continue = false;
             }
@@ -224,7 +271,7 @@ namespace Rickbolwa.Views
 
         private void OnAmountChanged(object sender, TextChangedEventArgs e)
         {
-            try { UpdateAmountHeadline(); }
+            try { UpdateAmountHeadline(); Validate(); }
             catch (Exception ex) { Log("OnAmountChanged", ex); }
         }
 
@@ -241,8 +288,9 @@ namespace Rickbolwa.Views
                 var pin = SafeText(PIN);
                 var pinOk = pin.Length == 4 && pin.All(char.IsDigit);
                 var destOk = !string.IsNullOrWhiteSpace(_destination);
+                var amountOk = ParseAmount(SafeText(Amount)) > 0;
 
-                _isFormValid = pinOk && destOk;
+                _isFormValid = pinOk && destOk && amountOk;
 
                 makepaymentbutton.BackgroundGradientStartColor = _isFormValid ? Color.FromHex("#004225") : Color.FromHex("#B9C7BF");
                 makepaymentbutton.BackgroundGradientEndColor = _isFormValid ? Color.FromHex("#00AA55") : Color.FromHex("#9FB0A6");
@@ -255,7 +303,7 @@ namespace Rickbolwa.Views
                 {
                     payLabel.Text = _isFormValid
                         ? "PROCESS PAYMENT"
-                        : (!destOk ? "DESTINATION MISSING" : "ENTER PIN TO CONTINUE");
+                        : (!destOk ? "SELECT DESTINATION" : (!amountOk ? "ENTER AMOUNT" : "ENTER PIN TO CONTINUE"));
                 }
             }
             catch (Exception ex)
@@ -293,10 +341,11 @@ namespace Rickbolwa.Views
                 payBusy.IsVisible = loading;
                 payBusy.IsRunning = loading;
                 payArrow.IsVisible = !loading;
-                payLabel.Text = loading ? "PROCESSING…" : (_isFormValid ? "PROCESS PAYMENT" : "ENTER PIN TO CONTINUE");
+                payLabel.Text = loading ? "PROCESSING…" : (_isFormValid ? "PROCESS PAYMENT" : "COMPLETE ALL FIELDS");
 
                 makepaymentbutton.InputTransparent = loading || !_isFormValid;
                 PIN.IsEnabled = !loading;
+                picker.IsEnabled = !loading;
             }
             catch (Exception ex) { Log("SetLoadingState", ex); }
         }
@@ -324,8 +373,16 @@ namespace Rickbolwa.Views
             {
                 if (string.IsNullOrWhiteSpace(_destination))
                 {
-                    await ShowFailurePopup("DESTINATION MISSING",
-                        "This vehicle record did not return a destination. Go back and re-verify the plate number before taking payment.");
+                    await ShowFailurePopup("DESTINATION REQUIRED",
+                        "Select the destination state before processing the payment.");
+                    return;
+                }
+
+                var amount = ParseAmount(SafeText(Amount));
+
+                if (amount <= 0)
+                {
+                    await ShowFailurePopup("INVALID AMOUNT", "Zero is an invalid amount to process.");
                     return;
                 }
 
@@ -345,30 +402,38 @@ namespace Rickbolwa.Views
                     return;
                 }
 
+                var email = SafeString(MainPage.ValidUserMail);
+
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    await ShowFailurePopup("SESSION EXPIRED",
+                        "Your login session is no longer valid. Please log out and sign in again.");
+                    return;
+                }
+
                 _isProcessing = true;
                 SetLoadingState(true);
 
                 var plate = SafeString(Verify.plateNumberss);
-                var amount = SafeText(Amount); // Or _expectedAmount.ToString() if Amount control isn't present
 
-                var nvc = new List<KeyValuePair<string, string>>
-        {
-            new KeyValuePair<string, string>("ServiceName", SafeString(Verify.vehicleTypess)),
-            new KeyValuePair<string, string>("Email", SafeString(MainPage.ValidUserMail)),
-            new KeyValuePair<string, string>("Amount", amount),
-            new KeyValuePair<string, string>("Pin", pin),
-            new KeyValuePair<string, string>("Payer", plate),
-            new KeyValuePair<string, string>("StateTo", _destination) // Change to CatNameSelected if using a different field
-        };
+                // Same form-urlencoded contract as the Borno haulage payment.
+                var form = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("ServiceName", SafeString(Verify.vehicleTypess)),
+                    new KeyValuePair<string, string>("Email", email),
+                    new KeyValuePair<string, string>("Amount", amount.ToString("0.##", CultureInfo.InvariantCulture)),
+                    new KeyValuePair<string, string>("Pin", pin),
+                    new KeyValuePair<string, string>("Payer", plate),
+                    new KeyValuePair<string, string>("StateTo", _destination)
+                };
 
-                // Log parameters safely without exposing the user's PIN
                 System.Diagnostics.Debug.WriteLine(
-                    $"[HaulagePayment] Request: {JsonConvert.SerializeObject(nvc.Where(kv => kv.Key != "Pin"))}");
+                    "[HaulagePayment] Request: " + string.Join("&", form.Where(kv => kv.Key != "Pin").Select(kv => kv.Key + "=" + kv.Value)));
 
                 string body;
                 int statusCode;
 
-                using (var content = new FormUrlEncodedContent(nvc))
+                using (var content = new FormUrlEncodedContent(form))
                 using (var response = await Http.PostAsync(PaymentUrl, content).ConfigureAwait(true))
                 {
                     body = await SafeReadAsync(response).ConfigureAwait(true);
@@ -382,7 +447,8 @@ namespace Rickbolwa.Views
                 try
                 {
                     if (!string.IsNullOrWhiteSpace(body))
-                        resp = JsonConvert.DeserializeObject<StateCollectionResponseObject>(body);
+                        resp = JsonConvert.DeserializeObject<StateCollectionResponseObject>(body,
+                            new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                 }
                 catch (Exception ex)
                 {
@@ -398,10 +464,10 @@ namespace Rickbolwa.Views
 
                 if (IsSuccess(resp.RespondCode))
                 {
-                    var receipt = BuildReceiptData(resp);
+                    var receipt = BuildReceiptData(resp, amount);
                     _lastReceiptData = receipt;
 
-                    await ShowSuccessPopup(resp);
+                    await ShowSuccessPopup(resp, amount);
 
                     // Fire and forget — printing must never block or crash the payment flow.
                     _ = AttemptPrintAsync(receipt, isReprint: false);
@@ -409,12 +475,11 @@ namespace Rickbolwa.Views
                 else
                 {
                     await ShowFailurePopup(TitleForCode(resp.RespondCode),
-                        FirstNonEmpty(resp.Message, resp.ResponseMessage,
+                        FirstNonEmpty(resp.Message,
                             $"The transaction was declined (code {SafeString(resp.RespondCode, "—")})."),
-                        detail: DifferingDetail(resp),
                         code: resp.RespondCode,
                         reference: resp.TransactionNo,
-                        amount: resp.TotalAmount > 0 ? resp.TotalAmount : _expectedAmount);
+                        amount: amount);
                 }
             }
             catch (TaskCanceledException)
@@ -446,6 +511,7 @@ namespace Rickbolwa.Views
                 SetLoadingState(false);
             }
         }
+
         private static async Task<string> SafeReadAsync(HttpResponseMessage response)
         {
             try
@@ -464,8 +530,8 @@ namespace Rickbolwa.Views
         {
             if (string.IsNullOrWhiteSpace(code)) return false;
 
-            var normalised = code.Trim();
-            return normalised == SuccessCode || normalised == "0" || normalised == "oo";
+            // Borno haulage payment treats only "00" as success.
+            return code.Trim() == SuccessCode;
         }
 
         private static string TitleForCode(string code)
@@ -497,59 +563,31 @@ namespace Rickbolwa.Views
             }
         }
 
-        /// <summary>
-        /// Returns responseMessage only when it adds information beyond message,
-        /// so the error sheet never shows the same sentence twice.
-        /// </summary>
-        private static string DifferingDetail(StateCollectionResponseObject resp)
-        {
-            try
-            {
-                var message = SafeString(resp?.Message);
-                var responseMessage = SafeString(resp?.ResponseMessage);
-
-                if (string.IsNullOrWhiteSpace(responseMessage)) return null;
-                if (string.Equals(message, responseMessage, StringComparison.OrdinalIgnoreCase)) return null;
-
-                return responseMessage;
-            }
-            catch (Exception ex)
-            {
-                Log("DifferingDetail", ex);
-                return null;
-            }
-        }
-
         // ───────────────────────── Popups ─────────────────────────
 
-        private Task ShowSuccessPopup(StateCollectionResponseObject resp)
+        private Task ShowSuccessPopup(StateCollectionResponseObject resp, decimal amount)
         {
             return Device.InvokeOnMainThreadAsync(() =>
             {
                 try
                 {
-                    // Server figure wins; the verified amount is the fallback.
-                    var paid = resp.TotalAmount > 0 ? resp.TotalAmount : _expectedAmount;
+                    var paid = amount;
                     var formatted = "₦" + paid.ToString("N2", CultureInfo.InvariantCulture);
 
                     PopupAmount.Text = formatted;
                     PopupAmountRow.Text = formatted;
 
-                    PopupRef.Text = FirstNonEmpty(resp.TransactionNo, resp.TId, "N/A");
-                    PopupVehicle.Text = FirstNonEmpty(resp.Vehicle, Verify.vehicleTypess, "—");
-                    PopupPlate.Text = FirstNonEmpty(resp.VehicleNo, Verify.plateNumberss, "—");
-                    PopupLGA.Text = FirstNonEmpty(resp.Destination, _destination, "—");
-                    PopupAgent.Text = FirstNonEmpty(resp.AgentName, MainPage.Name, "—");
+                    PopupRef.Text = FirstNonEmpty(resp.TransactionNo, resp.addSinglecollect?.TransactionNo, "N/A");
+                    PopupVehicle.Text = FirstNonEmpty(Verify.vehicleTypess, "—");
+                    PopupPlate.Text = FirstNonEmpty(Verify.plateNumberss, "—");
+                    PopupLGA.Text = FirstNonEmpty(_destination, "—");
+                    PopupAgent.Text = FirstNonEmpty(MainPage.Name, "—");
                     PopupDate.Text = DateTime.Now.ToString("dd MMM yyyy, hh:mm tt");
-                    PopupMessage.Text = FirstNonEmpty(resp.Message, resp.ResponseMessage, "Transaction completed successfully.");
+                    PopupMessage.Text = FirstNonEmpty(resp.Message, "Transaction completed successfully.");
 
-                    var paymentRef = SafeString(resp.PaymentReference);
-                    PopupPaymentRef.Text = paymentRef;
-                    PopupPaymentRefRow.IsVisible = !string.IsNullOrWhiteSpace(paymentRef);
-
-                    var expiry = FormatDate(resp.ExpDate);
-                    PopupExpiry.Text = expiry;
-                    PopupExpiryRow.IsVisible = !string.IsNullOrWhiteSpace(expiry);
+                    // The Borno response carries no payment reference or expiry date.
+                    PopupPaymentRefRow.IsVisible = false;
+                    PopupExpiryRow.IsVisible = false;
 
                     PrintingStatusLabel.Text = "🖨️  Sending receipt to printer…";
                     PopupReprintView.IsVisible = false;
@@ -652,38 +690,31 @@ namespace Rickbolwa.Views
 
         // ───────────────────────── Receipt ─────────────────────────
 
-        private ReceiptData BuildReceiptData(StateCollectionResponseObject resp, bool isReprint = false)
+        private ReceiptData BuildReceiptData(StateCollectionResponseObject resp, decimal amount, bool isReprint = false)
         {
             try
             {
-                var amount = resp != null && resp.TotalAmount > 0 ? resp.TotalAmount : _expectedAmount;
-                var reference = FirstNonEmpty(resp?.TransactionNo, resp?.TId, "N/A");
+                var reference = FirstNonEmpty(resp?.TransactionNo, resp?.addSinglecollect?.TransactionNo, "N/A");
 
                 var verifyUrl = $"https://rickbolwa.osoftpay.net/Singlecollections/Verify?TransactId={Uri.EscapeDataString(reference)}";
 
                 var items = new List<ReceiptItem>
                 {
-                    new ReceiptItem { Description = "AGENT NAME",      Amount = 0m, SubText = FirstNonEmpty(resp?.AgentName, MainPage.Name, "—") },
-                    new ReceiptItem { Description = "VEHICLE TYPE",    Amount = 0m, SubText = FirstNonEmpty(resp?.Vehicle, Verify.vehicleTypess, "—") },
-                    new ReceiptItem { Description = "VEHICLE NO", Amount = 0m, SubText = FirstNonEmpty(resp?.VehicleNo, Verify.plateNumberss, "—") },
-                    new ReceiptItem { Description = "AMOUNT PAID",     Amount = amount, SubText = "₦" + amount.ToString("N2", CultureInfo.InvariantCulture) }
+                    new ReceiptItem { Description = "AGENT NAME",   Amount = 0m, SubText = FirstNonEmpty(MainPage.Name, "—") },
+                    new ReceiptItem { Description = "VEHICLE TYPE", Amount = 0m, SubText = FirstNonEmpty(Verify.vehicleTypess, "—") },
+                    new ReceiptItem { Description = "VEHICLE NO",   Amount = 0m, SubText = FirstNonEmpty(Verify.plateNumberss, "—") },
+                    new ReceiptItem { Description = "DESTINATION",  Amount = 0m, SubText = FirstNonEmpty(_destination, "—") },
+                    new ReceiptItem { Description = "AMOUNT PAID",  Amount = amount, SubText = "₦" + amount.ToString("N2", CultureInfo.InvariantCulture) }
                 };
-
-                var paymentRef = SafeString(resp?.PaymentReference);
-                if (!string.IsNullOrWhiteSpace(paymentRef))
-                    items.Add(new ReceiptItem { Description = "PAYMENT REF", Amount = 0m, SubText = paymentRef });
-
-                var expiry = FormatDate(resp?.ExpDate);
-                if (!string.IsNullOrWhiteSpace(expiry))
-                    items.Add(new ReceiptItem { Description = "VALID UNTIL", Amount = 0m, SubText = expiry });
 
                 return new ReceiptData
                 {
                     StoreName = App.RevenueServiceName ?? "RICKBOLWA LIMITED",
                     StorePhone = "Contact us: +234 810 046 6363",
                     ReceiptNumber = reference,
-                    AgentName = FirstNonEmpty(resp?.AgentName, MainPage.Name, "—"),
+                    AgentName = FirstNonEmpty(MainPage.Name, "—"),
                     CollectionPoint = MainPage.CollectionPoint,
+                    TotalAmount = amount,
                     AmountPaid = amount,
                     PrintDate = DateTime.Now,
                     Items = items,
@@ -703,7 +734,8 @@ namespace Rickbolwa.Views
                     StoreName = "RICKBOLWA LIMITED",
                     ReceiptNumber = SafeString(resp?.TransactionNo, "N/A"),
                     CollectionPoint = MainPage.CollectionPoint,
-                    AmountPaid = resp != null && resp.TotalAmount > 0 ? resp.TotalAmount : _expectedAmount,
+                    TotalAmount = amount,
+                    AmountPaid = amount,
                     PrintDate = DateTime.Now,
                     Items = new List<ReceiptItem>(),
                     FooterLine1 = "Thank You!",
@@ -867,6 +899,7 @@ namespace Rickbolwa.Views
                     PrintDate = DateTime.Now,
                     Items = _lastReceiptData.Items,
                     AmountPaid = _lastReceiptData.AmountPaid,
+                    TotalAmount = _lastReceiptData.TotalAmount,
                     BarcodeLabel = _lastReceiptData.BarcodeLabel,
                     FooterLine1 = "*** REPRINTED RECEIPT ***",
                     FooterLine2 = $"Reprinted: {DateTime.Now:dd MMM yyyy HH:mm} | POWERED BY OSOFTPAY"
@@ -884,8 +917,8 @@ namespace Rickbolwa.Views
         private void ShowReprintButton() { try { ReprintButtonView.IsVisible = true; } catch (Exception ex) { Log("ShowReprint", ex); } }
         private void HideReprintButton() { try { ReprintButtonView.IsVisible = false; } catch (Exception ex) { Log("HideReprint", ex); } }
 
-
         // ───────────────────────── Helpers ─────────────────────────
+
         private static decimal ParseAmount(object raw)
         {
             try
@@ -905,27 +938,6 @@ namespace Rickbolwa.Views
             {
                 Log("ParseAmount", ex);
                 return 0m;
-            }
-        }
-
-        private static string FormatDate(string raw)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
-
-                if (DateTime.TryParse(raw, CultureInfo.InvariantCulture,
-                        DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var utc))
-                    return utc.ToLocalTime().ToString("dd MMM yyyy, hh:mm tt");
-
-                return DateTime.TryParse(raw, out var local)
-                    ? local.ToString("dd MMM yyyy, hh:mm tt")
-                    : raw;
-            }
-            catch (Exception ex)
-            {
-                Log("FormatDate", ex);
-                return string.Empty;
             }
         }
 
@@ -970,54 +982,20 @@ namespace Rickbolwa.Views
     internal class GetSateCatData { public string name { get; set; } }
 
     /// <summary>
-    /// Raw JSON request body for /Api/SingleCollections/Hulage.
-    /// </summary>
-    internal class HaulagePaymentRequest
-    {
-        [JsonProperty("payer")] public string Payer { get; set; }
-        [JsonProperty("email")] public string Email { get; set; }
-        [JsonProperty("pin")] public string Pin { get; set; }
-        [JsonProperty("serviceName")] public string ServiceName { get; set; }
-        [JsonProperty("vehicleNo")] public string VehicleNo { get; set; }
-        [JsonProperty("stateTo")] public string StateTo { get; set; }
-    }
-
-    /// <summary>
-    /// Mirrors the camelCase JSON contract returned by /Api/SingleCollections/Hulage.
+    /// Response of /api/SingleCollections/Hulage — same shape the Borno haulage module reads.
+    /// Json.NET matching is case-insensitive, so the PascalCase names bind to camelCase JSON.
     /// </summary>
     internal class StateCollectionResponseObject
     {
-        [JsonProperty("respondCode")] public string RespondCode { get; set; }
-        [JsonProperty("transactionNo")] public string TransactionNo { get; set; }
-        [JsonProperty("department")] public string Department { get; set; }
-        [JsonProperty("message")] public string Message { get; set; }
-        [JsonProperty("status")] public string Status { get; set; }
-        [JsonProperty("responseMessage")] public string ResponseMessage { get; set; }
-        [JsonProperty("noofDaysPaid")] public int? NoofDaysPaid { get; set; }
-        [JsonProperty("expDate")] public string ExpDate { get; set; }
-        [JsonProperty("payerId")] public string PayerId { get; set; }
-        [JsonProperty("totalAmount")] public decimal TotalAmount { get; set; }
-        [JsonProperty("breakdown")] public string Breakdown { get; set; }
-        [JsonProperty("vehicleNo")] public string VehicleNo { get; set; }
-        [JsonProperty("marketName")] public string MarketName { get; set; }
-        [JsonProperty("shopOwner")] public string ShopOwner { get; set; }
-        [JsonProperty("tId")] public string TId { get; set; }
-        [JsonProperty("paymentMethod")] public string PaymentMethod { get; set; }
-        [JsonProperty("paymentReference")] public string PaymentReference { get; set; }
-        [JsonProperty("agentName")] public string AgentName { get; set; }
-        [JsonProperty("vehicle")] public string Vehicle { get; set; }
-        [JsonProperty("destination")] public string Destination { get; set; }
-        [JsonProperty("differences")] public decimal Differences { get; set; }
-        [JsonProperty("noofSeat")] public int NoofSeat { get; set; }
-        [JsonProperty("amountRemitted")] public decimal AmountRemitted { get; set; }
-
-        // Retained so older code paths referencing the nested object still compile.
-        [JsonProperty("addSinglecollect")] public AddSinglecollect addSinglecollect { get; set; }
-        [JsonProperty("printCode")] public string PrintCode { get; set; }
+        public string RespondCode { get; set; }
+        public string Message { get; set; }
+        public AddSinglecollect addSinglecollect { get; set; }
+        public string PrintCode { get; set; }
+        public string TransactionNo { get; set; }
     }
 
     internal class AddSinglecollect
     {
-        [JsonProperty("transactionNo")] public string TransactionNo { get; set; }
+        public string TransactionNo { get; set; }
     }
 }

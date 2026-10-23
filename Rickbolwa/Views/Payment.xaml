@@ -157,7 +157,7 @@
                                     <Label Grid.Column="0" Text="🔒" FontSize="13" TextColor="White"
                                            VerticalOptions="Center" Margin="0,0,10,0"/>
                                     <Label Grid.Column="1"
-                                           Text="These details were pulled from the verified vehicle record. Only your transaction PIN is required."
+                                           Text="Vehicle details come from the verified record. Select the destination state and enter your transaction PIN."
                                            FontSize="10" TextColor="{StaticResource Muted}"
                                            LineBreakMode="WordWrap"/>
                                 </Grid>
@@ -203,26 +203,26 @@
                                 </yummy:PancakeView>
                             </StackLayout>
 
-                            <!-- DESTINATION TO (locked, passed from Verify) -->
+                            <!-- DESTINATION TO (state) — chosen here, same as the Borno haulage payment -->
                             <StackLayout Spacing="6">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Label Grid.Column="0" Text="DESTINATION TO (STATE)" Style="{StaticResource FieldLabel}"/>
-                                    <Label Grid.Column="1" x:Name="destinationBadge" Text="VERIFIED" Style="{StaticResource LockedBadge}"/>
+                                    <Label Grid.Column="1" x:Name="destinationBadge" Text="REQUIRED" Style="{StaticResource Badge}"/>
                                 </Grid>
-                                <yummy:PancakeView Style="{StaticResource LockedShell}">
+                                <yummy:PancakeView Style="{StaticResource FieldShell}">
                                     <Grid ColumnDefinitions="46,*">
                                         <Label Grid.Column="0" Text="🏁" Style="{StaticResource FieldIcon}" TextColor="White"/>
-                                        <renderers11:BorderlessEntry Grid.Column="1"
-                                                                     x:Name="DestinationTo"
-                                                                     FontSize="13"
-                                                                     FontAttributes="Bold"
-                                                                     IsReadOnly="True"
-                                                                     TextColor="#06581B"
-                                                                     BackgroundColor="Transparent"/>
+                                        <Picker Grid.Column="1"
+                                                x:Name="picker"
+                                                Title="Select state to"
+                                                TitleColor="#9AAFA3"
+                                                TextColor="#06581B"
+                                                FontSize="13"
+                                                SelectedIndexChanged="OnStateChanged"/>
                                     </Grid>
                                 </yummy:PancakeView>
                                 <Label x:Name="destinationError"
-                                       Text="No destination was returned for this vehicle. Re-verify the plate number before paying."
+                                       Text="Select the destination state before paying."
                                        FontSize="10" TextColor="{StaticResource Danger}"
                                        IsVisible="False" Margin="4,0,0,0"
                                        LineBreakMode="WordWrap"/>

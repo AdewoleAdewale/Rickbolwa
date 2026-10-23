@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:dxui="http://dips.xamarin.ui.com" xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" xmlns:renderers1="clr-namespace:Rickbolwa.Helper"
-             x:Class="Rickbolwa.Views.Registeration"                  NavigationPage.HasNavigationBar="True"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:dxui="http://dips.xamarin.ui.com" 
+             xmlns:yummy="clr-namespace:Xamarin.Forms.PancakeView;assembly=Xamarin.Forms.PancakeView" 
+             xmlns:renderers1="clr-namespace:Rickbolwa.Helper"
+             x:Class="Rickbolwa.Views.Registeration"     
+             NavigationPage.HasNavigationBar="True"
              BackgroundColor="#F2F6F3"
              Padding="0">
 
@@ -400,7 +404,7 @@
                                     <StackLayout Grid.Column="0" Spacing="3" VerticalOptions="Center">
                                         <Label Text="TOTAL HAULAGE FEE" FontSize="9"
                                                CharacterSpacing="1.2" TextColor="#8FD9B2"/>
-                                        <Label Text="{Binding Route}" FontSize="11" TextColor="White"
+                                        <Label Text="{Binding PlateNumber}" FontSize="11" TextColor="White"
                                                LineBreakMode="TailTruncation"/>
                                     </StackLayout>
                                     <Label Grid.Column="1" Text="{Binding Amount}"

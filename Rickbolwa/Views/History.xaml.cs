@@ -1,5 +1,6 @@
 ﻿using Acr.UserDialogs;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Rickbolwa.Services;
 using System;
 using System.Collections.Generic;
@@ -86,6 +87,9 @@ namespace Rickbolwa.Views
             public string FormattedAmount => $"₦{amount:N2}";
         }
 
+        // Estimated height of one transaction card (see listView.HeightRequest in ShowResultsState).
+        public const double HistoryRowHeight = 260;
+
         public class HistoryDataHeaderFooter : INotifyPropertyChanged
         {
             private List<HistoryData> _hd = new List<HistoryData>();
@@ -105,7 +109,7 @@ namespace Rickbolwa.Views
             }
 
             public string Summary => $"Total: {HD.Count} transaction{(HD.Count != 1 ? "s" : "")}";
-            public double Size => Math.Max(HD.Count * 200, 400); // Increased for better visibility
+            public double Size => Math.Max(HD.Count * HistoryRowHeight, 400);
             public decimal TotalAmount => HD.Sum(x => x.amount);
             public string FormattedTotalAmount => $"₦{TotalAmount:N2}";
 
@@ -238,7 +242,7 @@ namespace Rickbolwa.Views
             {
                 var httpClientHandler = new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => Rickbolwa.Services.ApiClient.ValidateCertificate(message, cert, chain, errors),
                     SslProtocols = System.Security.Authentication.SslProtocols.Tls12 |
                                    System.Security.Authentication.SslProtocols.Tls11
                 };
@@ -420,11 +424,11 @@ namespace Rickbolwa.Views
             {
 
 
-                string SearchStringFrom = Convert.ToString(startDatePicker.Date.ToString("MM/dd/yyyy"));
-                string SearchStringTo = Convert.ToString(endDatePicker.Date.ToString("MM/dd/yyyy"));
+                string SearchStringFrom = startDatePicker.Date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+                string SearchStringTo = endDatePicker.Date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
 
                 //call osoftpay for agent list
-                string url = "https://rickbolwa.osoftpay.net/api/TaskPayers/gettransaction?Email=" + MainPage.ValidUserMail + "&SearchFrom=" + SearchStringFrom + "&SearchTo=" + SearchStringTo;
+                string url = "https://rickbolwa.osoftpay.net/api/TaskPayers/gettransaction?Email=" + Uri.EscapeDataString(MainPage.ValidUserMail ?? string.Empty) + "&SearchFrom=" + Uri.EscapeDataString(SearchStringFrom) + "&SearchTo=" + Uri.EscapeDataString(SearchStringTo);
 
                 return (url, SearchStringFrom, SearchStringTo);
             }
@@ -467,7 +471,21 @@ namespace Rickbolwa.Views
 
                     try
                     {
-                        transactions = JsonConvert.DeserializeObject<List<HistoryData>>(json);
+                        var settings = new JsonSerializerSettings
+                        {
+                            NullValueHandling = NullValueHandling.Ignore,
+                            // One malformed field (e.g. an empty amount) must not discard the whole list.
+                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
+                        };
+
+                        // Accept an array, a single object, or an empty/"no records" body.
+                        var token = JToken.Parse(json);
+                        if (token is JArray)
+                            transactions = token.ToObject<List<HistoryData>>(JsonSerializer.Create(settings));
+                        else if (token is JObject && ((JObject)token).Property("payerId") != null)
+                            transactions = new List<HistoryData> { token.ToObject<HistoryData>(JsonSerializer.Create(settings)) };
+                        else
+                            transactions = new List<HistoryData>();
                         System.Diagnostics.Debug.WriteLine($"Deserialized {transactions?.Count ?? 0} transactions");
                     }
                     catch (JsonException jsonEx)
@@ -619,6 +637,12 @@ namespace Rickbolwa.Views
                 summaryLabel.Text = $"Found {transactions.Count} transaction{(transactions.Count != 1 ? "s" : "")} • Total: ₦{totalAmount:N2}";
 
                 // Force ListView to refresh
+                // A ListView inside a ScrollView is not given the height of its rows on Android,
+                // so only ~one row shows. Fixed-height rows + an explicit HeightRequest fix that.
+                listView.HasUnevenRows = false;
+                listView.RowHeight = (int)HistoryRowHeight;
+                listView.HeightRequest = transactions.Count * HistoryRowHeight;
+
                 listView.ItemsSource = null;
                 listView.ItemsSource = transactions;
 

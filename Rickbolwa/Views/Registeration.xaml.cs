@@ -1,5 +1,4 @@
 ﻿using Acr.UserDialogs;
-using Android.Telecom;
 using DIPS.Xamarin.UI.Controls.Sheet;
 using Newtonsoft.Json;
 using Rickbolwa.Services;
@@ -18,7 +17,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
-using Xamarin.Forms.PlatformConfiguration.iOSSpecific;
 using Xamarin.Forms.Xaml;
 
 namespace Rickbolwa.Views
@@ -26,25 +24,19 @@ namespace Rickbolwa.Views
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Registeration : ContentPage
     {
-        // ───────────────────────── Endpoints ─────────────────────────
+        // ───────────────────────── Endpoints (same contract as the Borno haulage module) ─────────────────────────
         private const string BaseUrl = "https://rickbolwa.osoftpay.net";
         private const string VehicleTypeUrl = BaseUrl + "/api/HulageVehicles/VehicleType";
         private const string LgaUrl = BaseUrl + "/api/HulageVehicles/getlga";
-        private const string RegisterUrl = BaseUrl + "/Api/HulageVehicles/VehicleReg";
+        private const string RegisterUrl = BaseUrl + "/api/HulageVehicles/VehicleReg";
 
+        // Driver name, plate number, owner phone, vehicle category, LGA.
         private const int TotalRequiredFields = 5;
 
-        /// <summary>
-        /// Destination From / Destination To are Nigerian states, not LGAs.
-        /// Static list — no round trip needed, and the form stays usable offline.
-        /// </summary>
-        private static readonly List<string> NigerianStates = new List<string>
+        // Null values from the API must not break deserialisation of the whole list.
+        private static readonly JsonSerializerSettings LenientJson = new JsonSerializerSettings
         {
-            "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno",
-            "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "Federal Capital Territory",
-            "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara",
-            "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers",
-            "Sokoto", "Taraba", "Yobe", "Zamfara"
+            NullValueHandling = NullValueHandling.Ignore
         };
 
         // Single shared client — avoids socket exhaustion from per-call HttpClient instances.
@@ -101,7 +93,8 @@ namespace Rickbolwa.Views
             {
                 var handler = new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (m, c, ch, er) => true
+                    ServerCertificateCustomValidationCallback =
+                        (m, c, ch, er) => ApiClient.ValidateCertificate(m, c, ch, er)
                 };
 
                 try
@@ -129,7 +122,8 @@ namespace Rickbolwa.Views
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11;
-                ServicePointManager.ServerCertificateValidationCallback = (s, cert, chain, errors) => true;
+                ServicePointManager.ServerCertificateValidationCallback =
+                    (s, cert, chain, errors) => ApiClient.ValidateCertificate(s, cert, chain, errors);
                 ServicePointManager.DefaultConnectionLimit = 10;
                 ServicePointManager.Expect100Continue = false;
             }
@@ -177,12 +171,6 @@ namespace Rickbolwa.Views
 
         // ───────────────────────── Reference data ─────────────────────────
 
-        /// <summary>
-        /// States are local, so both destination pickers are populated immediately —
-        /// they do not wait on (or fail with) the network.
-        /// </summary>
-      
-
         private async Task LoadReferenceDataAsync()
         {
             var busyShown = false;
@@ -228,7 +216,7 @@ namespace Rickbolwa.Views
             try
             {
                 picker.ItemDisplayBinding = new Binding("vehicleType");
-                picker.ItemsSource = _vehicleTypes;
+                picker.ItemsSource = _vehicleTypes.ToList();
 
                 picker2.ItemDisplayBinding = new Binding("lgaName");
                 picker2.ItemsSource = _lgas.ToList();
@@ -254,7 +242,7 @@ namespace Rickbolwa.Views
                     var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     if (string.IsNullOrWhiteSpace(json)) return null;
 
-                    return JsonConvert.DeserializeObject<T>(json);
+                    return JsonConvert.DeserializeObject<T>(json, LenientJson);
                 }
             }
             catch (Exception ex)
@@ -302,7 +290,6 @@ namespace Rickbolwa.Views
                 var phoneOk = phone.Length >= 10 && phone.Length <= 11 && phone.All(char.IsDigit);
                 var vehicleOk = vehicle != null && !string.IsNullOrWhiteSpace(vehicle.vehicleType);
                 var lgaOk = lga != null && !string.IsNullOrWhiteSpace(lga.lgaName);
-         
 
                 SetFieldState(driverBadge, driverError, driverOk, showErrors && driver.Length > 0,
                     "Enter the driver's full name (minimum 3 characters).");
@@ -312,7 +299,6 @@ namespace Rickbolwa.Views
                     "Phone number must be 10–11 digits, numbers only.");
                 SetFieldState(vehicleBadge, vehicleError, vehicleOk, false, string.Empty);
                 SetFieldState(lgaBadge, lgaError, lgaOk, false, string.Empty);
-      
 
                 var completed = new[] { driverOk, plateOk, phoneOk, vehicleOk, lgaOk }.Count(v => v);
                 _isFormValid = completed == TotalRequiredFields;
@@ -394,13 +380,23 @@ namespace Rickbolwa.Views
                     return;
                 }
 
-                feeLabel.Text = "₦" + vehicle.amount.ToString("N2", CultureInfo.InvariantCulture);
-                feeSubLabel.Text = vehicle.vehicleType;
+                var fee = ParseAmount(vehicle.amount);
+
+                if (fee > 0m)
+                {
+                    feeLabel.Text = "₦" + fee.ToString("N2", CultureInfo.InvariantCulture);
+                    feeSubLabel.Text = vehicle.vehicleType;
+                }
+                else
+                {
+                    // The vehicle-type list did not carry a fee — it is confirmed at verification/payment.
+                    feeLabel.Text = "—";
+                    feeSubLabel.Text = $"{vehicle.vehicleType} • fee confirmed at payment";
+                }
             }
             catch (Exception ex) { Log("UpdateFeePreview", ex); }
         }
 
- 
         // ───────────────────────── Submit ─────────────────────────
 
         private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
@@ -418,6 +414,15 @@ namespace Rickbolwa.Views
                     return;
                 }
 
+                var recordedBy = (MainPage.ValidUserMail ?? string.Empty).Trim();
+
+                if (recordedBy.Length == 0)
+                {
+                    ShowFailure("SESSION EXPIRED",
+                        "Your login session is no longer valid. Please log out and sign in again before registering a vehicle.");
+                    return;
+                }
+
                 var vehicle = picker.SelectedItem as VehicleCatData;
                 var lga = picker2.SelectedItem as LGACatData;
 
@@ -428,15 +433,26 @@ namespace Rickbolwa.Views
                     OwnerPhone = SafeText(Ownernumber),
                     LGA = lga?.lgaName ?? string.Empty,
                     VehicleType = vehicle?.vehicleType ?? string.Empty,
-                    RecordedBy = ResolveRecordedBy()
+                    RecordedBy = recordedBy
+                };
+
+                // Same form-urlencoded contract the Borno haulage registration uses.
+                var form = new List<KeyValuePair<string, string>>
+                {
+                    new KeyValuePair<string, string>("NameofDriver", payload.NameofDriver),
+                    new KeyValuePair<string, string>("PlateNumber", payload.PlateNumber),
+                    new KeyValuePair<string, string>("OwnerPhone", payload.OwnerPhone),
+                    new KeyValuePair<string, string>("LGA", payload.LGA),
+                    new KeyValuePair<string, string>("VehicleType", payload.VehicleType),
+                    new KeyValuePair<string, string>("RecordedBy", payload.RecordedBy)
                 };
 
                 SetSubmitting(true);
 
-                var json = JsonConvert.SerializeObject(payload);
-                System.Diagnostics.Debug.WriteLine($"[Reg] Request: {json}");
+                System.Diagnostics.Debug.WriteLine(
+                    "[Reg] Request: " + string.Join("&", form.Select(kv => kv.Key + "=" + kv.Value)));
 
-                using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
+                using (var content = new FormUrlEncodedContent(form))
                 using (var response = await Http.PostAsync(RegisterUrl, content).ConfigureAwait(true))
                 {
                     var body = string.Empty;
@@ -451,7 +467,7 @@ namespace Rickbolwa.Views
                     try
                     {
                         if (!string.IsNullOrWhiteSpace(body))
-                            parsed = JsonConvert.DeserializeObject<VechicleRegisterationResponse>(body);
+                            parsed = JsonConvert.DeserializeObject<VechicleRegisterationResponse>(body, LenientJson);
                     }
                     catch (Exception ex)
                     {
@@ -516,6 +532,8 @@ namespace Rickbolwa.Views
         {
             if (string.IsNullOrWhiteSpace(statusCode)) return false;
 
+            // The Borno haulage API answers "oo" (letters) on a successful registration;
+            // "00" / "0" are accepted too in case the server is corrected later.
             var code = statusCode.Trim().ToLowerInvariant();
             return code == "00" || code == "0" || code == "oo";
         }
@@ -537,19 +555,6 @@ namespace Rickbolwa.Views
             return "Please complete all required fields.";
         }
 
-        private static string ResolveRecordedBy()
-        {
-            try
-            {
-                return string.IsNullOrWhiteSpace(MainPage.ValidUserMail) ? "haulage@gmail.com" : MainPage.ValidUserMail;
-            }
-            catch (Exception ex)
-            {
-                Log("ResolveRecordedBy", ex);
-                return "haulage@gmail.com";
-            }
-        }
-
         // ───────────────────────── Result presentation ─────────────────────────
 
         private void ShowSuccess(VechicleRegisterationResponse response, VechicleRegistrationObject request)
@@ -564,11 +569,10 @@ namespace Rickbolwa.Views
                 _result.Message = Fallback(response.message, "The vehicle has been registered successfully.");
 
                 var lga = Fallback(response.lga, request.LGA);
-                var state = Fallback(response.state, "Kogi State");
+                var state = Fallback(response.state, string.Empty);
                 _result.LgaState = string.IsNullOrWhiteSpace(state) ? lga : $"{lga}, {state}";
 
-             
-                _result.Amount = FormatAmount(response.amount);
+                _result.Amount = FormatAmount(Fallback(response.amount, response.totalAmount));
                 _result.DateRecorded = FormatDate(response.dateRecorded);
                 PublishToVerifyContext(response, request);
 
@@ -611,11 +615,20 @@ namespace Rickbolwa.Views
             catch (Exception ex) { Log("ShowFailure", ex); }
         }
 
+        private static decimal ParseAmount(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return 0m;
+
+            var cleaned = raw.Replace(",", "").Replace("₦", "").Trim();
+
+            return decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var value) ? value : 0m;
+        }
+
         private static string FormatAmount(string raw)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(raw)) return "₦0.00";
+                if (string.IsNullOrWhiteSpace(raw)) return string.Empty;
 
                 var cleaned = raw.Replace(",", "").Replace("₦", "").Trim();
 
@@ -627,7 +640,7 @@ namespace Rickbolwa.Views
             catch (Exception ex)
             {
                 Log("FormatAmount", ex);
-                return "₦0.00";
+                return string.Empty;
             }
         }
 
@@ -713,17 +726,15 @@ namespace Rickbolwa.Views
                 Verify.nameofDriverss = Fallback(response.nameofDriver, request.NameofDriver);
                 Verify.plateNumberss = Fallback(response.plateNumber, request.PlateNumber);
                 Verify.ownerPhoness = Fallback(response.ownerPhone, request.OwnerPhone);
-                Verify.statess = Fallback(response.state, "Kogi State");
+                Verify.statess = Fallback(response.state, string.Empty);
                 Verify.lgass = Fallback(response.lga, request.LGA);
                 Verify.vehicleTypess = Fallback(response.vehicleType, request.VehicleType);
-                Verify.amountss = response.amount ?? string.Empty;
+                Verify.amountss = Fallback(response.amount, response.totalAmount);
                 Verify.messagess = Fallback(response.message, "Vehicle registered successfully.");
                 Verify.recordedByss = Fallback(response.recordedBy, request.RecordedBy);
                 Verify.dateRecordedss = response.dateRecorded ?? string.Empty;
 
-
-
-                // Deliberately NOT response.statusCode. On this endpoint "00" means the
+                // Deliberately NOT response.statusCode. On this endpoint "00"/"oo" means the
                 // registration succeeded, but Verify renders statusCodess == "00" as the
                 // PAID badge — and this vehicle has not paid yet. Leaving it blank keeps
                 // the badge on PENDING until a payment actually goes through.
@@ -798,11 +809,9 @@ namespace Rickbolwa.Views
         private string _ownerPhone = "—";
         private string _vehicleType = "—";
         private string _lgaState = "—";
-        private string _route = "—";
         private string _amount = "₦0.00";
         private string _dateRecorded = "—";
         private string _recordedBy = "—";
-        private string _referenceId = "—";
         private string _message = "The vehicle has been registered successfully.";
         private string _errorTitle = "REGISTRATION FAILED";
         private string _errorMessage = "The registration could not be completed. Please verify your details and try again.";
@@ -812,11 +821,9 @@ namespace Rickbolwa.Views
         public string OwnerPhone { get => _ownerPhone; set => Set(ref _ownerPhone, value); }
         public string VehicleType { get => _vehicleType; set => Set(ref _vehicleType, value); }
         public string LgaState { get => _lgaState; set => Set(ref _lgaState, value); }
-        public string Route { get => _route; set => Set(ref _route, value); }
         public string Amount { get => _amount; set => Set(ref _amount, value); }
         public string DateRecorded { get => _dateRecorded; set => Set(ref _dateRecorded, value); }
         public string RecordedBy { get => _recordedBy; set => Set(ref _recordedBy, value); }
-        public string ReferenceId { get => _referenceId; set => Set(ref _referenceId, value); }
         public string Message { get => _message; set => Set(ref _message, value); }
         public string ErrorTitle { get => _errorTitle; set => Set(ref _errorTitle, value); }
         public string ErrorMessage { get => _errorMessage; set => Set(ref _errorMessage, value); }
@@ -831,12 +838,14 @@ namespace Rickbolwa.Views
         }
     }
 
-    // ═════════════════════════ DTOs ═════════════════════════
+    // ═════════════════════════ DTOs (same shapes as the Borno haulage module) ═════════════════════════
 
     internal class VehicleCatData
     {
         public string vehicleType { get; set; }
-        public decimal amount { get; set; }
+
+        // Optional. Kept as a string so a number, a quoted number or a missing value all deserialise.
+        public string amount { get; set; }
     }
 
     internal class LGACatData
@@ -844,9 +853,6 @@ namespace Rickbolwa.Views
         public string lgaName { get; set; }
     }
 
-    /// <summary>
-    /// Matches the JSON response contract returned by /Api/HulageVehicles/VehicleReg.
-    /// </summary>
     internal class VechicleRegisterationResponse
     {
         public string nameofDriver { get; set; }
@@ -863,18 +869,13 @@ namespace Rickbolwa.Views
         public string dateRecorded { get; set; }
     }
 
-    /// <summary>
-    /// Request payload. JsonProperty names map exactly to the camelCase keys the API expects,
-    /// so the C# property names can stay PascalCase for existing callers.
-    /// </summary>
     internal class VechicleRegistrationObject
     {
-        [JsonProperty("nameofDriver")] public string NameofDriver { get; set; }
-        [JsonProperty("plateNumber")] public string PlateNumber { get; set; }
-        [JsonProperty("ownerPhone")] public string OwnerPhone { get; set; }
-        [JsonProperty("lga")] public string LGA { get; set; }
-
-        [JsonProperty("vehicleType")] public string VehicleType { get; set; }
-        [JsonProperty("recordedBy")] public string RecordedBy { get; set; }
+        public string NameofDriver { get; set; }
+        public string PlateNumber { get; set; }
+        public string OwnerPhone { get; set; }
+        public string LGA { get; set; }
+        public string VehicleType { get; set; }
+        public string RecordedBy { get; set; }
     }
 }
