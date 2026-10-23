@@ -56,12 +56,12 @@
             <StackLayout Spacing="0">
 
                 <!-- Enhanced Modern Header -->
-                <yummy:PancakeView BackgroundGradientStartColor="#23891A" 
+                <yummy:PancakeView BackgroundGradientStartColor="#06581B" 
                                    BackgroundGradientEndColor="#06581B"
                                    BackgroundGradientAngle="135"
                                    HasShadow="True"
                                    Elevation="12">
-                    <StackLayout Padding="20,40,20,30" Spacing="8">
+                    <StackLayout Padding="20,10,20,30" Spacing="8">
                         <Label Text="ROCKBOLWA" TextColor="White"
                                FontSize="36" 
                                HorizontalOptions="Center"/>

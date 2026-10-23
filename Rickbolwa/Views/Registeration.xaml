@@ -85,10 +85,9 @@
 
                 <!-- ══════════ GRADIENT HEADER ══════════ -->
                 <yummy:PancakeView BackgroundGradientStartColor="#06581B"
- BackgroundGradientEndColor="#23891A"
-                                   BackgroundGradientAngle="180"
+ BackgroundGradientEndColor="#06581B"
                                    CornerRadius="0,0,32,32"
-                                   Padding="24,50,24,44">
+                                   Padding="24,10,24,44">
                     <Grid ColumnDefinitions="*,Auto">
                         <StackLayout Grid.Column="0" Spacing="5" VerticalOptions="Center">
                             <Label Text="VEHICLE REGISTRATION"

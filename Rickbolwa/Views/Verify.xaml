@@ -10,7 +10,7 @@
 
             <!-- ══════════ GRADIENT HEADER ══════════ -->
             <yummy:PancakeView BackgroundGradientStartColor="#06581B"
- BackgroundGradientEndColor="#23891A"
+ BackgroundGradientEndColor="#06581B"
                                BackgroundGradientAngle="135"
                                CornerRadius="0,0,20,20"
                                Padding="24,50,24,30">
