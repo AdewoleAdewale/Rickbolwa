@@ -27,7 +27,24 @@ namespace Rickbolwa.Views
 
         private async void OnCancelClicked(object sender, EventArgs e)
         {
-            await Navigation.PopModalAsync();
+            SessionManager.Instance.UpdateActivity();
+            await NavigateBackSafelyAsync();
+        }
+
+        private async Task NavigateBackSafelyAsync()
+        {
+            if (Navigation.ModalStack != null && Navigation.ModalStack.Count > 0)
+            {
+                await Navigation.PopModalAsync();
+            }
+            else if (Navigation.NavigationStack != null && Navigation.NavigationStack.Count > 1)
+            {
+                await Navigation.PopAsync();
+            }
+            else
+            {
+                Application.Current.MainPage = new NavigationPage(new Views.DashBoard());
+            }
         }
 
         private async void OnUpdatePinClicked(object sender, EventArgs e)

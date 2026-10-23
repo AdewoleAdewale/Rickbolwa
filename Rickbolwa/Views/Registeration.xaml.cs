@@ -32,7 +32,7 @@ namespace Rickbolwa.Views
         private const string LgaUrl = BaseUrl + "/api/HulageVehicles/getlga";
         private const string RegisterUrl = BaseUrl + "/Api/HulageVehicles/VehicleReg";
 
-        private const int TotalRequiredFields = 7;
+        private const int TotalRequiredFields = 5;
 
         /// <summary>
         /// Destination From / Destination To are Nigerian states, not LGAs.
@@ -69,7 +69,6 @@ namespace Rickbolwa.Views
                 sheetBehavior.IsOpen = false;
                 failedenumeration.IsOpen = false;
                 ConfigureSsl();
-                BindStatePickers();
                 TrackUserActivity();
                 Validate(showErrors: false);
             }
@@ -182,23 +181,7 @@ namespace Rickbolwa.Views
         /// States are local, so both destination pickers are populated immediately —
         /// they do not wait on (or fail with) the network.
         /// </summary>
-        private void BindStatePickers()
-        {
-            try
-            {
-                // ItemDisplayBinding must stay null for plain string sources.
-                pickerFrom.ItemDisplayBinding = null;
-                pickerFrom.ItemsSource = NigerianStates.ToList();
-
-                SessionManager.Instance.UpdateActivity();
-                pickerTo.ItemDisplayBinding = null;
-                pickerTo.ItemsSource = NigerianStates.ToList();
-            }
-            catch (Exception ex)
-            {
-                Log("BindStatePickers", ex);
-            }
-        }
+      
 
         private async Task LoadReferenceDataAsync()
         {
@@ -294,7 +277,6 @@ namespace Rickbolwa.Views
             try
             {
                 UpdateFeePreview();
-                UpdateRoutePreview();
                 Validate(showErrors: true);
             }
             catch (Exception ex) { Log("OnPickerChanged", ex); }
@@ -314,16 +296,13 @@ namespace Rickbolwa.Views
 
                 var vehicle = picker?.SelectedItem as VehicleCatData;
                 var lga = picker2?.SelectedItem as LGACatData;
-                var from = pickerFrom?.SelectedItem as string;
-                var to = pickerTo?.SelectedItem as string;
 
                 var driverOk = driver.Length >= 3;
                 var plateOk = plate.Replace(" ", "").Replace("-", "").Length >= 5;
                 var phoneOk = phone.Length >= 10 && phone.Length <= 11 && phone.All(char.IsDigit);
                 var vehicleOk = vehicle != null && !string.IsNullOrWhiteSpace(vehicle.vehicleType);
                 var lgaOk = lga != null && !string.IsNullOrWhiteSpace(lga.lgaName);
-                var fromOk = !string.IsNullOrWhiteSpace(from);
-                var toOk = !string.IsNullOrWhiteSpace(to);
+         
 
                 SetFieldState(driverBadge, driverError, driverOk, showErrors && driver.Length > 0,
                     "Enter the driver's full name (minimum 3 characters).");
@@ -333,10 +312,9 @@ namespace Rickbolwa.Views
                     "Phone number must be 10–11 digits, numbers only.");
                 SetFieldState(vehicleBadge, vehicleError, vehicleOk, false, string.Empty);
                 SetFieldState(lgaBadge, lgaError, lgaOk, false, string.Empty);
-                SetFieldState(fromBadge, fromError, fromOk, false, string.Empty);
-                SetFieldState(toBadge, toError, toOk, false, string.Empty);
+      
 
-                var completed = new[] { driverOk, plateOk, phoneOk, vehicleOk, lgaOk, fromOk, toOk }.Count(v => v);
+                var completed = new[] { driverOk, plateOk, phoneOk, vehicleOk, lgaOk }.Count(v => v);
                 _isFormValid = completed == TotalRequiredFields;
 
                 UpdateSubmitState(completed);
@@ -422,33 +400,7 @@ namespace Rickbolwa.Views
             catch (Exception ex) { Log("UpdateFeePreview", ex); }
         }
 
-        private void UpdateRoutePreview()
-        {
-            try
-            {
-                var from = pickerFrom?.SelectedItem as string;
-                var to = pickerTo?.SelectedItem as string;
-
-                if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
-                {
-                    routePreview.Text = "Select origin and destination states";
-                    routePreview.TextColor = Color.FromHex("#6B7B72");
-                    return;
-                }
-
-                if (string.Equals(from, to, StringComparison.OrdinalIgnoreCase))
-                {
-                    routePreview.Text = $"{from} → {to}  (intra-state movement)";
-                    routePreview.TextColor = Color.FromHex("#C08A2E");
-                    return;
-                }
-
-                routePreview.Text = $"{from} → {to}";
-                routePreview.TextColor = Color.FromHex("#00893E");
-            }
-            catch (Exception ex) { Log("UpdateRoutePreview", ex); }
-        }
-
+ 
         // ───────────────────────── Submit ─────────────────────────
 
         private async void TapGestureRecognizer_Tapped(object sender, EventArgs e)
@@ -468,8 +420,6 @@ namespace Rickbolwa.Views
 
                 var vehicle = picker.SelectedItem as VehicleCatData;
                 var lga = picker2.SelectedItem as LGACatData;
-                var from = pickerFrom.SelectedItem as string;
-                var to = pickerTo.SelectedItem as string;
 
                 var payload = new VechicleRegistrationObject
                 {
@@ -477,8 +427,6 @@ namespace Rickbolwa.Views
                     PlateNumber = SafeText(Platenumber).ToUpperInvariant().Replace(" ", ""),
                     OwnerPhone = SafeText(Ownernumber),
                     LGA = lga?.lgaName ?? string.Empty,
-                    DestinationFrom = from ?? string.Empty,
-                    DestinationTo = to ?? string.Empty,
                     VehicleType = vehicle?.vehicleType ?? string.Empty,
                     RecordedBy = ResolveRecordedBy()
                 };
@@ -583,8 +531,6 @@ namespace Rickbolwa.Views
                     return "Enter a valid 10–11 digit phone number.";
                 if (!(picker?.SelectedItem is VehicleCatData)) return "Select a vehicle category.";
                 if (!(picker2?.SelectedItem is LGACatData)) return "Select the Local Government Area.";
-                if (string.IsNullOrWhiteSpace(pickerFrom?.SelectedItem as string)) return "Select the state the vehicle is travelling from.";
-                if (string.IsNullOrWhiteSpace(pickerTo?.SelectedItem as string)) return "Select the state the vehicle is travelling to.";
             }
             catch (Exception ex) { Log("FirstMissingFieldMessage", ex); }
 
@@ -618,16 +564,12 @@ namespace Rickbolwa.Views
                 _result.Message = Fallback(response.message, "The vehicle has been registered successfully.");
 
                 var lga = Fallback(response.lga, request.LGA);
-                var state = Fallback(response.state, "Yobe State");
+                var state = Fallback(response.state, "Kogi State");
                 _result.LgaState = string.IsNullOrWhiteSpace(state) ? lga : $"{lga}, {state}";
 
-                var from = Fallback(response.destinationFrom, request.DestinationFrom);
-                var to = Fallback(response.destinationTo, request.DestinationTo);
-                _result.Route = $"{from} → {to}";
-
+             
                 _result.Amount = FormatAmount(response.amount);
                 _result.DateRecorded = FormatDate(response.dateRecorded);
-                _result.ReferenceId = response.id > 0 ? response.id.ToString() : "—";
                 PublishToVerifyContext(response, request);
 
                 Device.BeginInvokeOnMainThread(() =>
@@ -744,11 +686,8 @@ namespace Rickbolwa.Views
 
                 picker.SelectedIndex = -1;
                 picker2.SelectedIndex = -1;
-                pickerFrom.SelectedIndex = -1;
-                pickerTo.SelectedIndex = -1;
 
                 UpdateFeePreview();
-                UpdateRoutePreview();
                 Validate(showErrors: false);
 
                 SessionManager.Instance.UpdateActivity();
@@ -774,7 +713,7 @@ namespace Rickbolwa.Views
                 Verify.nameofDriverss = Fallback(response.nameofDriver, request.NameofDriver);
                 Verify.plateNumberss = Fallback(response.plateNumber, request.PlateNumber);
                 Verify.ownerPhoness = Fallback(response.ownerPhone, request.OwnerPhone);
-                Verify.statess = Fallback(response.state, "Yobe State");
+                Verify.statess = Fallback(response.state, "Kogi State");
                 Verify.lgass = Fallback(response.lga, request.LGA);
                 Verify.vehicleTypess = Fallback(response.vehicleType, request.VehicleType);
                 Verify.amountss = response.amount ?? string.Empty;
@@ -782,8 +721,7 @@ namespace Rickbolwa.Views
                 Verify.recordedByss = Fallback(response.recordedBy, request.RecordedBy);
                 Verify.dateRecordedss = response.dateRecorded ?? string.Empty;
 
-                Verify.destinationFromss = Fallback(response.destinationFrom, request.DestinationFrom);
-                Verify.destinationToss = Fallback(response.destinationTo, request.DestinationTo);
+
 
                 // Deliberately NOT response.statusCode. On this endpoint "00" means the
                 // registration succeeded, but Verify renders statusCodess == "00" as the
@@ -911,23 +849,18 @@ namespace Rickbolwa.Views
     /// </summary>
     internal class VechicleRegisterationResponse
     {
-        public int id { get; set; }
         public string nameofDriver { get; set; }
         public string plateNumber { get; set; }
         public string ownerPhone { get; set; }
         public string state { get; set; }
+        public string totalAmount { get; set; }
         public string lga { get; set; }
-        public string email { get; set; }
-        public string destinationFrom { get; set; }
-        public string destinationTo { get; set; }
-        public string agent { get; set; }
         public string vehicleType { get; set; }
         public string message { get; set; }
         public string statusCode { get; set; }
         public string amount { get; set; }
         public string recordedBy { get; set; }
         public string dateRecorded { get; set; }
-        public string lastPaymentDate { get; set; }
     }
 
     /// <summary>
@@ -940,8 +873,7 @@ namespace Rickbolwa.Views
         [JsonProperty("plateNumber")] public string PlateNumber { get; set; }
         [JsonProperty("ownerPhone")] public string OwnerPhone { get; set; }
         [JsonProperty("lga")] public string LGA { get; set; }
-        [JsonProperty("destinationFrom")] public string DestinationFrom { get; set; }
-        [JsonProperty("destinationTo")] public string DestinationTo { get; set; }
+
         [JsonProperty("vehicleType")] public string VehicleType { get; set; }
         [JsonProperty("recordedBy")] public string RecordedBy { get; set; }
     }

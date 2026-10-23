@@ -114,7 +114,7 @@
                                    Style="{StaticResource SectionTitle}"/>
                             <Label Grid.Column="1"
                                    x:Name="progressLabel"
-                                   Text="0 OF 7 COMPLETED"
+                                   Text="0 OF 5 COMPLETED"
                                    FontSize="10" FontAttributes="Bold"
                                    TextColor="{StaticResource Muted}"/>
                         </Grid>
@@ -302,59 +302,6 @@
                                 </Grid>
                             </yummy:PancakeView>
                             <Label x:Name="lgaError" Style="{StaticResource ErrorLabel}"/>
-                        </StackLayout>
-
-                        <!-- DESTINATION FROM (STATE) -->
-                        <StackLayout Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="DESTINATION FROM (STATE)" Style="{StaticResource FieldLabel}"/>
-                                <Label Grid.Column="1" x:Name="fromBadge" Text="REQUIRED" Style="{StaticResource Badge}"/>
-                            </Grid>
-                            <yummy:PancakeView Style="{StaticResource FieldShell}">
-                                <Grid ColumnDefinitions="46,*">
-                                    <Label Grid.Column="0" Text="📍" Style="{StaticResource FieldIcon}" TextColor="White"/>
-                                    <Picker Grid.Column="1"
-                                            x:Name="pickerFrom"
-                                            Title="Journey origin state"
-                                            TitleColor="#9AAFA3"
-                                            TextColor="#06581B"
-                                            FontSize="13"
-                                            SelectedIndexChanged="OnPickerChanged"/>
-                                </Grid>
-                            </yummy:PancakeView>
-                            <Label x:Name="fromError" Style="{StaticResource ErrorLabel}"/>
-                        </StackLayout>
-
-                        <!-- ROUTE CONNECTOR -->
-                        <Grid ColumnDefinitions="46,*" HeightRequest="18">
-                            <Label Grid.Column="0" Text="↓" FontSize="16"
-                                   TextColor="{StaticResource BrandLight}"
-                                   HorizontalOptions="Center" VerticalOptions="Center"/>
-                            <Label Grid.Column="1" x:Name="routePreview"
-                                   Text="Select origin and destination states"
-                                   FontSize="10" TextColor="{StaticResource Muted}"
-                                   VerticalOptions="Center"/>
-                        </Grid>
-
-                        <!-- DESTINATION TO (STATE) -->
-                        <StackLayout Spacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="DESTINATION TO (STATE)" Style="{StaticResource FieldLabel}"/>
-                                <Label Grid.Column="1" x:Name="toBadge" Text="REQUIRED" Style="{StaticResource Badge}"/>
-                            </Grid>
-                            <yummy:PancakeView Style="{StaticResource FieldShell}">
-                                <Grid ColumnDefinitions="46,*">
-                                    <Label Grid.Column="0" Text="🏁" Style="{StaticResource FieldIcon}" TextColor="White"/>
-                                    <Picker Grid.Column="1"
-                                            x:Name="pickerTo"
-                                            Title="Journey destination state"
-                                            TitleColor="#9AAFA3"
-                                            TextColor="#06581B"
-                                            FontSize="13"
-                                            SelectedIndexChanged="OnPickerChanged"/>
-                                </Grid>
-                            </yummy:PancakeView>
-                            <Label x:Name="toError" Style="{StaticResource ErrorLabel}"/>
                         </StackLayout>
 
                         <BoxView HeightRequest="1" BackgroundColor="#E8F0EA"/>

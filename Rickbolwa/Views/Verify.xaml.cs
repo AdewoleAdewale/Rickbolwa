@@ -34,8 +34,13 @@ namespace Rickbolwa.Views
         public static string recordedByss { get; set; }
         public static string dateRecordedss { get; set; }
 
-        public static string destinationFromss { get; set; }
-        public static string destinationToss { get; set; }
+        // Compatibility aliases for existing references across Rickbolwa
+        public static string customerNamess { get => nameofDriverss; set => nameofDriverss = value; }
+        public static string EnumerationIDss { get => plateNumberss; set => plateNumberss = value; }
+        public static string phoneNumberss { get => ownerPhoness; set => ownerPhoness = value; }
+        public static string vehicleColorss { get => lgass; set => lgass = value; }
+        public static string chasisNumberss { get => messagess; set => messagess = value; }
+        public static string addressss { get => statess; set => statess = value; }
 
         public Verify()
         {
@@ -163,9 +168,12 @@ namespace Rickbolwa.Views
 
                             if (result != null && !string.IsNullOrEmpty(result.plateNumber))
                             {
+                              
+                                dateRecordedss = result.dateRecorded;
                                 nameofDriverss = result.nameofDriver;
                                 plateNumberss = result.plateNumber;
                                 lgass = result.lga;
+                                statess = result.state;
                                 amountss = result.amount;
                                 vehicleTypess = result.vehicleType;
                                 ownerPhoness = result.ownerPhone;
@@ -173,8 +181,6 @@ namespace Rickbolwa.Views
                                 statusCodess = result.statusCode;
                                 recordedByss = result.recordedBy;
                                 dateRecordedss = result.dateRecorded;
-                                destinationFromss = result.destinationFrom;
-                                destinationToss = result.destinationTo;
 
                                 await Application.Current.SavePropertiesAsync();
 
@@ -259,9 +265,6 @@ namespace Rickbolwa.Views
             public string amount { get; set; }
             public string recordedBy { get; set; }
             public string dateRecorded { get; set; }
-
-            public string destinationFrom { get; set; }
-            public string destinationTo { get; set; }
         }
     }
 }

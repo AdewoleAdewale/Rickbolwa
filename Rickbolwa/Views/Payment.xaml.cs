@@ -143,7 +143,7 @@ namespace Rickbolwa.Views
             try
             {
                 // Verify.destinationToss is the primary source; lga is the legacy fallback.
-                var destination = SafeString(Verify.destinationToss);
+                var destination = SafeString(Verify.lgass);
 
                 if (string.IsNullOrWhiteSpace(destination))
                     destination = SafeString(Verify.lgass);
@@ -349,27 +349,26 @@ namespace Rickbolwa.Views
                 SetLoadingState(true);
 
                 var plate = SafeString(Verify.plateNumberss);
+                var amount = SafeText(Amount); // Or _expectedAmount.ToString() if Amount control isn't present
 
-                var payload = new HaulagePaymentRequest
-                {
-                    Payer = plate,
-                    Email = SafeString(MainPage.ValidUserMail),
-                    Pin = pin,
-                    ServiceName = SafeString(Verify.vehicleTypess),
-                    VehicleNo = plate,
-                    StateTo = _destination
-                };
+                var nvc = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>("ServiceName", SafeString(Verify.vehicleTypess)),
+            new KeyValuePair<string, string>("Email", SafeString(MainPage.ValidUserMail)),
+            new KeyValuePair<string, string>("Amount", amount),
+            new KeyValuePair<string, string>("Pin", pin),
+            new KeyValuePair<string, string>("Payer", plate),
+            new KeyValuePair<string, string>("StateTo", _destination) // Change to CatNameSelected if using a different field
+        };
 
-                // Raw JSON body — the endpoint no longer takes form-url-encoded data.
-                var requestJson = JsonConvert.SerializeObject(payload);
-
+                // Log parameters safely without exposing the user's PIN
                 System.Diagnostics.Debug.WriteLine(
-                    $"[HaulagePayment] Request: {JsonConvert.SerializeObject(new { payload.Payer, payload.Email, payload.ServiceName, payload.VehicleNo, payload.StateTo })}");
+                    $"[HaulagePayment] Request: {JsonConvert.SerializeObject(nvc.Where(kv => kv.Key != "Pin"))}");
 
                 string body;
                 int statusCode;
 
-                using (var content = new StringContent(requestJson, Encoding.UTF8, "application/json"))
+                using (var content = new FormUrlEncodedContent(nvc))
                 using (var response = await Http.PostAsync(PaymentUrl, content).ConfigureAwait(true))
                 {
                     body = await SafeReadAsync(response).ConfigureAwait(true);
@@ -447,7 +446,6 @@ namespace Rickbolwa.Views
                 SetLoadingState(false);
             }
         }
-
         private static async Task<string> SafeReadAsync(HttpResponseMessage response)
         {
             try
@@ -668,7 +666,6 @@ namespace Rickbolwa.Views
                     new ReceiptItem { Description = "AGENT NAME",      Amount = 0m, SubText = FirstNonEmpty(resp?.AgentName, MainPage.Name, "—") },
                     new ReceiptItem { Description = "VEHICLE TYPE",    Amount = 0m, SubText = FirstNonEmpty(resp?.Vehicle, Verify.vehicleTypess, "—") },
                     new ReceiptItem { Description = "VEHICLE NO", Amount = 0m, SubText = FirstNonEmpty(resp?.VehicleNo, Verify.plateNumberss, "—") },
-                    new ReceiptItem { Description = "DESTINATION",     Amount = 0m, SubText = FirstNonEmpty(resp?.Destination, _destination, "—") },
                     new ReceiptItem { Description = "AMOUNT PAID",     Amount = amount, SubText = "₦" + amount.ToString("N2", CultureInfo.InvariantCulture) }
                 };
 
@@ -887,8 +884,8 @@ namespace Rickbolwa.Views
         private void ShowReprintButton() { try { ReprintButtonView.IsVisible = true; } catch (Exception ex) { Log("ShowReprint", ex); } }
         private void HideReprintButton() { try { ReprintButtonView.IsVisible = false; } catch (Exception ex) { Log("HideReprint", ex); } }
 
-        // ───────────────────────── Helpers ─────────────────────────
 
+        // ───────────────────────── Helpers ─────────────────────────
         private static decimal ParseAmount(object raw)
         {
             try
