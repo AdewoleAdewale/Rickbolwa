@@ -851,18 +851,17 @@ namespace Rickbolwa
                 // ToLowerInvariant: culture-independent, and the case labels below are all lowercase.
                 switch ((agent.category ?? string.Empty).Trim().ToLowerInvariant())
                 {
-                   
-                    case "hulage":
-                        targetPage = new Views.DashBoard();
-                        agentType = "Haulage Agent";
-                        break;
 
-             
+                    case "default":
+                        targetPage = new Views.DashBoard();
+                        agentType = "Default Agent";
+                        break;
 
                     default:
                         ShowErrorToast($"Unknown agent category: {agent.category}");
                         return;
                 }
+
 
                 if (targetPage != null)
                 {

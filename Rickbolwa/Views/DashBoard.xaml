@@ -12,8 +12,8 @@
 
                 <!-- ═══════════════ HEADER ═══════════════ -->
                 <yummy:PancakeView Grid.Row="0"
-                                   BackgroundGradientStartColor="#053485"
-                                   BackgroundGradientEndColor="#043382"
+                                   BackgroundGradientStartColor="#06581B"
+                                   BackgroundGradientEndColor="#23891A"
                                    BackgroundGradientAngle="135"
                                    CornerRadius="0,0,30,30"
                                    Padding="20,50,20,30">
@@ -74,8 +74,8 @@
 
                     <!-- Super Agent Card -->
                     <yummy:PancakeView Grid.Column="0"
-                                    BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                                    BackgroundGradientStartColor="#06581B"
+BackgroundGradientEndColor="#23891A"
                                        BackgroundGradientAngle="135"
                                        CornerRadius="10"
                                        Padding="16,14"
@@ -87,13 +87,13 @@ BackgroundGradientEndColor="#043382"
                                        Text="SUPER AGENT"
                                        FontSize="9" FontAttributes="Bold"
                                        CharacterSpacing="1.5"
-                                       TextColor="#1792de"/>
+                                       TextColor="#E3A008"/>
                                 <yummy:PancakeView Grid.Column="1"
                                                    BackgroundColor="Transparent"
                                                    CornerRadius="6"
                                                    Padding="4,2">
                                     <Label Text="LIVE" FontSize="8"
-                                           TextColor="#1792de"
+                                           TextColor="#E3A008"
                                            FontAttributes="Bold"/>
                                 </yummy:PancakeView>
                             </Grid>
@@ -111,9 +111,8 @@ BackgroundGradientEndColor="#043382"
                     </yummy:PancakeView>
 
                     <!-- Collection Point Card -->
-                    <yummy:PancakeView Grid.Column="1"
-                                                                          BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                    <yummy:PancakeView Grid.Column="1" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                        BackgroundGradientAngle="135"
                                        CornerRadius="10"
                                        Padding="16,14"
@@ -125,7 +124,7 @@ BackgroundGradientEndColor="#043382"
                                        Text="COLLECTION PT"
                                        FontSize="9" FontAttributes="Bold"
                                        CharacterSpacing="1.5"
-                                         TextColor="#1792de"/>
+                                         TextColor="#E3A008"/>
                                 <Label Grid.Column="1" Text="📍" FontSize="12"/>
                             </Grid>
                             <Label x:Name="Agents"
@@ -151,24 +150,23 @@ BackgroundGradientEndColor="#043382"
                                Text="QUICK ACTIONS"
                                FontSize="12" FontAttributes="Bold"
                                CharacterSpacing="2"
-                               TextColor="#053485"/>
+                               TextColor="#06581B"/>
                         <Label Grid.Column="1"
                                Text="Swipe for more →"
-                               FontSize="10" TextColor="#053485"/>
+                               FontSize="10" TextColor="#06581B"/>
                     </Grid>
 
                     <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                         <StackLayout Orientation="Horizontal" Spacing="12" Padding="2,4,16,8">
 
                             <!-- REG VEHICLE -->
-                            <yummy:PancakeView WidthRequest="130"
-                                                                                                                      BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                            <yummy:PancakeView WidthRequest="130" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                BackgroundGradientAngle="160"
                                                CornerRadius="10"
                                                Padding="14,16"
                                                Elevation="10" HasShadow="True"
-                                               BorderColor="#1792de" BorderThickness="1">
+                                               BorderColor="#E3A008" BorderThickness="1">
                                 <StackLayout Spacing="10">
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="5"
@@ -188,10 +186,10 @@ BackgroundGradientEndColor="#043382"
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="8"
                                                        Padding="8,6"
-                                                       BorderColor="#1792de" BorderThickness="1">
+                                                       BorderColor="#E3A008" BorderThickness="1">
                                         <Label Text="GET STARTED →"
                                                FontSize="9" FontAttributes="Bold"
-                                               TextColor="#053485"
+                                               TextColor="#E3A008"
                                                HorizontalTextAlignment="Center"/>
                                         <yummy:PancakeView.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_5"/>
@@ -201,14 +199,13 @@ BackgroundGradientEndColor="#043382"
                             </yummy:PancakeView>
 
                             <!-- VERIFY VEHICLE -->
-                            <yummy:PancakeView WidthRequest="130"
- BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                            <yummy:PancakeView WidthRequest="130" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                BackgroundGradientAngle="160"
                                                CornerRadius="10"
                                                Padding="14,16"
                                                Elevation="10" HasShadow="True"
-                                               BorderColor="#1792de" BorderThickness="1">
+                                               BorderColor="#E3A008" BorderThickness="1">
                                 <StackLayout Spacing="10">
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="5"
@@ -227,10 +224,10 @@ BackgroundGradientEndColor="#043382"
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="8"
                                                        Padding="8,6"
-                                                       BorderColor="#1792de" BorderThickness="1">
+                                                       BorderColor="#E3A008" BorderThickness="1">
                                         <Label Text="VERIFY NOW →"
                                                FontSize="9" FontAttributes="Bold"
-                                               TextColor="#053485"
+                                               TextColor="#06581B"
                                                HorizontalTextAlignment="Center"/>
                                         <yummy:PancakeView.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped"/>
@@ -241,13 +238,13 @@ BackgroundGradientEndColor="#043382"
 
                             <!-- HISTORY -->
                             <yummy:PancakeView WidthRequest="130"
-                                              BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                                              BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                BackgroundGradientAngle="160"
                                                CornerRadius="10"
                                                Padding="14,16"
                                                Elevation="10" HasShadow="True"
-                                               BorderColor="#1792de" BorderThickness="1">
+                                               BorderColor="#E3A008" BorderThickness="1">
                                 <StackLayout Spacing="10">
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="5"
@@ -266,10 +263,10 @@ VerticalOptions="Center"/>
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="8"
                                                        Padding="8,6"
-                                                       BorderColor="#1792de" BorderThickness="1">
+                                                       BorderColor="#E3A008" BorderThickness="1">
                                         <Label Text="VIEW ALL →"
                                                FontSize="9" FontAttributes="Bold"
-                                               TextColor="#053485"
+                                               TextColor="#06581B"
                                                HorizontalTextAlignment="Center"/>
                                         <yummy:PancakeView.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_1"/>
@@ -279,14 +276,13 @@ VerticalOptions="Center"/>
                             </yummy:PancakeView>
 
                             <!-- OTHERS / SETTINGS -->
-                            <yummy:PancakeView WidthRequest="130"
- BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                            <yummy:PancakeView WidthRequest="130" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                BackgroundGradientAngle="160"
                                                CornerRadius="10"
                                                Padding="14,16"
                                                Elevation="10" HasShadow="True"
-                                               BorderColor="#1792de" BorderThickness="1">
+                                               BorderColor="#E3A008" BorderThickness="1">
                                 <StackLayout Spacing="10">
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="5"
@@ -305,10 +301,10 @@ BackgroundGradientEndColor="#043382"
                                     <yummy:PancakeView BackgroundColor="White"
                                                        CornerRadius="8"
                                                        Padding="8,6"
-                                                       BorderColor="#1792de" BorderThickness="1">
+                                                       BorderColor="#E3A008" BorderThickness="1">
                                         <Label Text="MANAGE →"
                                                FontSize="9" FontAttributes="Bold"
-                                               TextColor="#053485"
+                                               TextColor="#06581B"
                                                HorizontalTextAlignment="Center"/>
                                         <yummy:PancakeView.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_8"/>
@@ -323,9 +319,8 @@ BackgroundGradientEndColor="#043382"
 
                 <!-- ═══════════════ TODAY'S SUMMARY STRIP ═══════════════ -->
                 <yummy:PancakeView Grid.Row="3"
-                                   Margin="16,10,16,0"
-                                BackgroundGradientStartColor="#053485"
-BackgroundGradientEndColor="#043382"
+                                   Margin="16,10,16,0" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                    BackgroundGradientAngle="90"
                                    CornerRadius="10"
                                    Padding="16,14"
@@ -373,10 +368,10 @@ BackgroundGradientEndColor="#043382"
                                Text="RECENT TRANSACTIONS"
                                FontSize="12" FontAttributes="Bold"
                                CharacterSpacing="2"
-                               TextColor="#063381"/>
+                               TextColor="#06581B"/>
                         <Label Grid.Column="1"
                                Text="See all"
-                               FontSize="11" TextColor="#063381"
+                               FontSize="11" TextColor="#06581B"
                                VerticalOptions="Center">
                             <Label.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="TapGestureRecognizer_Tapped_1"/>
@@ -395,9 +390,8 @@ BackgroundGradientEndColor="#043382"
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <ViewCell>
-                                    <yummy:PancakeView Margin="0,0,0,10"
-                                                       BackgroundGradientStartColor="#053485"
-                                                       BackgroundGradientEndColor="#063381"
+                                    <yummy:PancakeView Margin="0,0,0,10" BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                        BackgroundGradientAngle="135"
                                                        CornerRadius="16"
                                                        Padding="14,12"
@@ -463,14 +457,14 @@ BackgroundGradientEndColor="#043382"
                              Margin="0,10,0,0"
                              Padding="20,16"
                              BackgroundColor="White">
-                    <BoxView HeightRequest="1" BackgroundColor="#053485" Margin="0,0,0,14"/>
+                    <BoxView HeightRequest="1" BackgroundColor="#06581B" Margin="0,0,0,14"/>
                     <Label Text="POWERED BY OSOFTPAY"
-                           TextColor="#053485"
+                           TextColor="#06581B"
                            HorizontalOptions="CenterAndExpand"
                            FontSize="11" FontAttributes="Bold"
                            CharacterSpacing="2"/>
                     <Label Text="© 2026 Rickbolwa Limited"
-                           TextColor="#053485" FontSize="9"
+                           TextColor="#06581B" FontSize="9"
                            HorizontalOptions="CenterAndExpand"
                            Margin="0,4,0,0"/>
                 </StackLayout>
@@ -481,7 +475,7 @@ BackgroundGradientEndColor="#043382"
         <!-- ═══════════════ FLOATING ACTION MENU ═══════════════ -->
         <dxui:ModalityLayout.Behaviors>
             <dxui:FloatingActionMenuBehaviour Size="56"
-                                              ExpandButtonBackgroundColor="#053485"
+                                              ExpandButtonBackgroundColor="#06581B"
                                               ExpandButtonText="MORE"
                                               ExpandButtonFontSize="12"
                                               Source="icons.png"
@@ -490,7 +484,7 @@ BackgroundGradientEndColor="#043382"
                                               XPosition=".88"
                                               YPosition=".92"
                                               IsVisible="true">
-                <dxui:MenuButton BackgroundColor="#053485"
+                <dxui:MenuButton BackgroundColor="#06581B"
                                  Text="TEST PRINTER"
                                  x:Name="FirstButton"
                                  Padding="5"

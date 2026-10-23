@@ -116,8 +116,8 @@ namespace Rickbolwa
 
                 switch ((SessionManager.Category ?? string.Empty).Trim().ToLowerInvariant())
                 {
-                  
-                    case "hulage": return new Views.DashBoard();
+
+                    case "default": return new Views.DashBoard();
                     default:
                         // Unknown or missing category — the session is not usable, so drop
                         // it rather than stranding the agent on a blank shell.

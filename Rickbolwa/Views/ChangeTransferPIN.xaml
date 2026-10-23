@@ -14,7 +14,7 @@
                     <Image Source="Rickbolwawhite" Margin="5"   HorizontalOptions="Center" VerticalOptions="Center"/>
                 </Frame>
 
-                <Label Text="Reset Transaction PIN" FontAttributes="Bold" FontSize="18" TextColor="#053485" HorizontalTextAlignment="Center"/>
+                <Label Text="Reset Transaction PIN" FontAttributes="Bold" FontSize="18" TextColor="#06581B" HorizontalTextAlignment="Center"/>
                 <Label Text="Update your 4-digit PIN for processing payments." FontSize="12" TextColor="#666" HorizontalTextAlignment="Center"/>
 
                 <!-- Input Fields -->
@@ -42,7 +42,7 @@
                 <Grid ColumnDefinitions="*, *" ColumnSpacing="10">
                     <Button Grid.Column="0" Text="Cancel" BackgroundColor="#F0F3F4" TextColor="#333" 
                             FontAttributes="Bold" CornerRadius="10" HeightRequest="48" Clicked="OnCancelClicked"/>
-                    <Button Grid.Column="1" Text="Update PIN" BackgroundColor="#053485" TextColor="White" 
+                    <Button Grid.Column="1" Text="Update PIN" BackgroundColor="#06581B" TextColor="White" 
                             FontAttributes="Bold" CornerRadius="10" HeightRequest="48" Clicked="OnUpdatePinClicked"/>
                 </Grid>
 

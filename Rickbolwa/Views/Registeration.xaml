@@ -9,8 +9,8 @@
     <ContentPage.Resources>
         <ResourceDictionary>
 
-            <Color x:Key="Brand">#053485</Color>
-            <Color x:Key="BrandLight">#1c94e0</Color>
+            <Color x:Key="Brand">#06581B</Color>
+            <Color x:Key="BrandLight">#23891A</Color>
             <Color x:Key="Danger">#D64545</Color>
             <Color x:Key="Muted">#6B7B72</Color>
             <Color x:Key="FieldBg">#F1F6F2</Color>
@@ -27,7 +27,7 @@
                 <Setter Property="FontSize" Value="10"/>
                 <Setter Property="FontAttributes" Value="Bold"/>
                 <Setter Property="CharacterSpacing" Value="1.2"/>
-                <Setter Property="TextColor" Value="#053485"/>
+                <Setter Property="TextColor" Value="#23891A"/>
                 <Setter Property="VerticalOptions" Value="Center"/>
             </Style>
 
@@ -69,7 +69,7 @@
             <Style x:Key="SummaryValue" TargetType="Label">
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="FontAttributes" Value="Bold"/>
-                <Setter Property="TextColor" Value="#053485"/>
+                <Setter Property="TextColor" Value="#23891A"/>
                 <Setter Property="HorizontalTextAlignment" Value="End"/>
                 <Setter Property="LineBreakMode" Value="TailTruncation"/>
                 <Setter Property="VerticalOptions" Value="Center"/>
@@ -84,8 +84,8 @@
             <StackLayout Spacing="0">
 
                 <!-- ══════════ GRADIENT HEADER ══════════ -->
-                <yummy:PancakeView BackgroundGradientStartColor="#053485"
-                                   BackgroundGradientEndColor="#043382"
+                <yummy:PancakeView BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                    BackgroundGradientAngle="180"
                                    CornerRadius="0,0,32,32"
                                    Padding="24,50,24,44">
@@ -96,7 +96,7 @@
                                    CharacterSpacing="0.5"
                                    TextColor="White"/>
                             <Label Text="Haulage &amp; Transit Enumeration Module"
-                                   FontSize="11" TextColor="#1c94e0"/>
+                                   FontSize="11" TextColor="#FD8F01"/>
                         </StackLayout>
                         <Image Grid.Column="1" Source="logo" HeightRequest="50" VerticalOptions="Center"/>
                     </Grid>
@@ -167,7 +167,7 @@
                                                                 ClearButtonVisibility="WhileEditing"
                                                                 Placeholder="Full name of driver"
                                                                 PlaceholderColor="#9AAFA3"
-                                                                TextColor="#063381"
+                                                                TextColor="#06581B"
                                                                 BackgroundColor="Transparent"
                                                                 TextChanged="OnFieldChanged"/>
                                 </Grid>
@@ -192,7 +192,7 @@
                                                                 ClearButtonVisibility="WhileEditing"
                                                                 Placeholder="e.g. 08012345678"
                                                                 PlaceholderColor="#9AAFA3"
-                                                                TextColor="#063381"
+                                                                TextColor="#06581B"
                                                                 BackgroundColor="Transparent"
                                                                 TextChanged="OnFieldChanged"/>
                                 </Grid>
@@ -228,7 +228,7 @@
                                                                 ClearButtonVisibility="WhileEditing"
                                                                 Placeholder="e.g. ABC124XA"
                                                                 PlaceholderColor="#9AAFA3"
-                                                                TextColor="#063381"
+                                                                TextColor="#06581B"
                                                                 BackgroundColor="Transparent"
                                                                 TextChanged="OnFieldChanged"/>
                                 </Grid>
@@ -249,7 +249,7 @@
                                             x:Name="picker"
                                             Title="Select vehicle category"
                                             TitleColor="#9AAFA3"
-                                            TextColor="#063381"
+                                            TextColor="#06581B"
                                             FontSize="13"
                                             SelectedIndexChanged="OnPickerChanged"/>
                                 </Grid>
@@ -258,15 +258,15 @@
                         </StackLayout>
 
                         <!-- FEE PREVIEW -->
-                        <yummy:PancakeView BackgroundColor="#063381"
+                        <yummy:PancakeView BackgroundColor="#06581B"
                                            CornerRadius="14"
                                            Padding="16,12">
                             <Grid ColumnDefinitions="*,Auto">
                                 <StackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                                     <Label Text="ESTIMATED HAULAGE FEE" FontSize="9"
-                                           CharacterSpacing="1.2" TextColor="#1c94e0"/>
+                                           CharacterSpacing="1.2" TextColor="#FD8F01"/>
                                     <Label x:Name="feeSubLabel" Text="Select a vehicle category"
-                                           FontSize="10" TextColor="#1c94e0"/>
+                                           FontSize="10" TextColor="#FD8F01"/>
                                 </StackLayout>
                                 <Label Grid.Column="1" x:Name="feeLabel" Text="—"
                                        FontSize="18" FontAttributes="Bold"
@@ -297,7 +297,7 @@
                                             x:Name="picker2"
                                             Title="Select LGA"
                                             TitleColor="#9AAFA3"
-                                            TextColor="#043382"
+                                            TextColor="#06581B"
                                             FontSize="13"
                                             SelectedIndexChanged="OnPickerChanged"/>
                                 </Grid>
@@ -318,7 +318,7 @@
                                             x:Name="pickerFrom"
                                             Title="Journey origin state"
                                             TitleColor="#9AAFA3"
-                                            TextColor="#043382"
+                                            TextColor="#06581B"
                                             FontSize="13"
                                             SelectedIndexChanged="OnPickerChanged"/>
                                 </Grid>
@@ -350,7 +350,7 @@
                                             x:Name="pickerTo"
                                             Title="Journey destination state"
                                             TitleColor="#9AAFA3"
-                                            TextColor="#043382"
+                                            TextColor="#06581B"
                                             FontSize="13"
                                             SelectedIndexChanged="OnPickerChanged"/>
                                 </Grid>
@@ -407,9 +407,9 @@
             <dxui:SheetBehavior x:Name="sheetBehavior"
                                 IsOpen="False"
                                 IsCancelButtonVisible="False"
-                                TitleColor="#043382"
+                                TitleColor="#06581B"
                                 ActionTitle="CLOSE"
-                                ActionTitleColor="#043382"
+                                ActionTitleColor="#06581B"
                                 ActionClicked="sheetBehavior_ActionClicked"
                                 Title="REGISTRATION RECEIPT"
                                 HeaderColor="White"
@@ -437,7 +437,7 @@
                                 <Label Text="REGISTRATION SUCCESSFUL"
                                        FontSize="17" FontAttributes="Bold"
                                        CharacterSpacing="1"
-                                       TextColor="#043382"
+                                       TextColor="#06581B"
                                        HorizontalOptions="Center"/>
                                 <Label Text="{Binding Message}"
                                        FontSize="11" TextColor="#6B7B72"
@@ -445,8 +445,8 @@
                             </StackLayout>
 
                             <!-- Amount banner -->
-                            <yummy:PancakeView BackgroundGradientStartColor="#043382"
-                                               BackgroundGradientEndColor="#043382"
+                            <yummy:PancakeView BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                                                BackgroundGradientAngle="120"
                                                CornerRadius="10"
                                                Padding="18,14">
@@ -515,8 +515,8 @@
                             </yummy:PancakeView>
 
                             <!-- PROCEED TO PAYMENT (new) -->
-                            <yummy:PancakeView BackgroundGradientStartColor="#043382"
-                   BackgroundGradientEndColor="#043382"
+                            <yummy:PancakeView  BackgroundGradientStartColor="#06581B"
+ BackgroundGradientEndColor="#23891A"
                    BackgroundGradientAngle="90"
                    CornerRadius="14"
                    HeightRequest="54"
@@ -546,7 +546,7 @@
                                 <Label Text="REGISTER ANOTHER VEHICLE  →"
            FontSize="13" FontAttributes="Bold"
            CharacterSpacing="0.8"
-           TextColor="#043382"
+           TextColor="#06581B"
            HorizontalOptions="Center" VerticalOptions="Center"/>
                                 <yummy:PancakeView.GestureRecognizers>
                                     <TapGestureRecognizer Tapped="tryagain_Clicked"/>

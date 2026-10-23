@@ -31,11 +31,11 @@
         <yummy:PancakeView x:Name="BackgroundGradient">
             <yummy:PancakeView.BackgroundGradientStops>
                 <yummy:GradientStopCollection>
-                    <yummy:GradientStop Color="#053485" Offset="0"/>
-                    <yummy:GradientStop Color="#063381" Offset="0.25"/>
-                    <yummy:GradientStop Color="#043382" Offset="0.5"/>
-                    <yummy:GradientStop Color="#043382" Offset="0.75"/>
-                    <yummy:GradientStop Color="#053485" Offset="1"/>
+                    <yummy:GradientStop Color="#06581B" Offset="0"/>
+                    <yummy:GradientStop Color="#23891A" Offset="0.25"/>
+                    <yummy:GradientStop Color="#23891A" Offset="0.5"/>
+                    <yummy:GradientStop Color="#06581B" Offset="0.75"/>
+                    <yummy:GradientStop Color="#06581B" Offset="1"/>
                 </yummy:GradientStopCollection>
             </yummy:PancakeView.BackgroundGradientStops>
         </yummy:PancakeView>
@@ -62,14 +62,14 @@
                         x:Name="LogoContainer"
                         HeightRequest="80"
                         WidthRequest="80"
-                        CornerRadius="40"
+                        CornerRadius="20"
                         HorizontalOptions="Center"
                         HasShadow="True"
                         Elevation="8">
                         <yummy:PancakeView.BackgroundGradientStops>
                             <yummy:GradientStopCollection>
-                                <yummy:GradientStop Color="#0589da" Offset="0"/>
-                                <yummy:GradientStop Color="#1692e0" Offset="1"/>
+                                <yummy:GradientStop Color="White" Offset="0"/>
+                                <yummy:GradientStop Color="WhiteSmoke" Offset="1"/>
                             </yummy:GradientStopCollection>
                         </yummy:PancakeView.BackgroundGradientStops>
                         <Image Source="Rickbolwawhite"
@@ -163,7 +163,7 @@
                                     Grid.Column="1"
                                     Text="Forgot Password?"
                                     FontSize="12"
-                                    TextColor="#1692e0"
+                                    TextColor="#23891A"
                                     FontAttributes="Bold"
                                     VerticalOptions="Center">
                                     <Label.GestureRecognizers>
@@ -239,7 +239,7 @@
                             Margin="0,0,0,0">
                             <CheckBox 
                                 x:Name="RememberMeCheckbox"
-                                Color="#1792de"
+                                Color="#FDB405"
                                 IsChecked="False"
                                 VerticalOptions="Center"/>
                             <Label
@@ -263,9 +263,9 @@
                             Elevation="8">
                             <yummy:PancakeView.BackgroundGradientStops>
                                 <yummy:GradientStopCollection>
-                                    <yummy:GradientStop Color="#0589da" Offset="0"/>
-                                    <yummy:GradientStop Color="#1792de" Offset="0.5"/>
-                                    <yummy:GradientStop Color="#1692e0" Offset="1"/>
+                                    <yummy:GradientStop Color="#FDB405" Offset="0"/>
+                                    <yummy:GradientStop Color="#FD8F01" Offset="0.5"/>
+                                    <yummy:GradientStop Color="#E3A008" Offset="1"/>
                                 </yummy:GradientStopCollection>
                             </yummy:PancakeView.BackgroundGradientStops>
 
@@ -401,7 +401,7 @@
                                 HeightRequest="60"
                                 WidthRequest="60"
                                 CornerRadius="30"
-                                BorderColor="#00D084"
+                                BorderColor="#FD8F01"
                                 BorderThickness="4"
                                 BackgroundColor="Transparent"/>
 
@@ -410,7 +410,7 @@
                                 HeightRequest="45"
                                 WidthRequest="45"
                                 CornerRadius="22.5"
-                                BorderColor="#0589da"
+                                BorderColor="#FD8F01"
                                 BorderThickness="3"
                                 BackgroundColor="Transparent"
                                 HorizontalOptions="Center"
@@ -418,7 +418,7 @@
 
                             <ActivityIndicator 
                                 IsRunning="True"
-                                Color="#0589da"
+                                Color="#FD8F01"
                                 HeightRequest="30"
                                 WidthRequest="30"
                                 HorizontalOptions="Center"

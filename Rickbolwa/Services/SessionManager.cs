@@ -49,21 +49,21 @@ namespace Rickbolwa.Services
         public static string Token { get; set; } = "";
         public static string Role { get; set; } = "Agent";
         // ── Storage keys ──────────────────────────────────────────────────────
-        private const string KeyActive = "yirs.session.active";
-        private const string KeyEmail = "yirs.session.email";
-        private const string KeyName = "yirs.session.name";
-        private const string KeyCategory = "yirs.session.category";
-        private const string KeyCollectionPoint = "yirs.session.collectionPoint";
-        private const string KeySuperAgent = "yirs.session.superAgent";
-        private const string KeyMessage = "yirs.session.message";
-        private const string KeySignedInAt = "yirs.session.signedInAtUtc";
-        private const string KeyLastSeenAt = "yirs.session.lastSeenAtUtc";
+        private const string KeyActive = "rick.session.active";
+        private const string KeyEmail = "rick.session.email";
+        private const string KeyName = "rick.session.name";
+        private const string KeyCategory = "rick.session.category";
+        private const string KeyCollectionPoint = "rick.session.collectionPoint";
+        private const string KeySuperAgent = "rick.session.superAgent";
+        private const string KeyMessage = "rick.session.message";
+        private const string KeySignedInAt = "rick.session.signedInAtUtc";
+        private const string KeyLastSeenAt = "rick.session.lastSeenAtUtc";
 
-        private const string SecretPin = "yirs.session.pin";
-        private const string SecretPassword = "yirs.session.password";
+        private const string SecretPin = "rick.session.pin";
+        private const string SecretPassword = "rick.session.password";
 
         // Used only when the device keystore is unusable.
-        private const string FallbackPrefix = "yirs.fallback.";
+        private const string FallbackPrefix = "rick.fallback.";
 
         private static readonly SemaphoreSlim Gate = new SemaphoreSlim(1, 1);
 
